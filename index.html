@@ -193,6 +193,28 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div id="settings-toggles" style="display:flex;flex-direction:column;gap:0"></div>
     </div>
     <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="label-sm" style="color:#7c3aed">Supabase Database</div>
+        <div id="sb-status-badge" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--bg3);color:var(--txt4)">Not connected</div>
+      </div>
+      <div style="font-size:12px;color:var(--txt4);margin-bottom:14px;line-height:1.6">Connect your Supabase project so data syncs across devices. Get your URL + anon key from <span style="color:#7c3aed">supabase.com</span> → Settings → API.</div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--txt4);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Project URL</div>
+        <input id="sb-url-input" type="url" placeholder="https://xxxx.supabase.co" style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:11px 12px;font-size:13px;color:var(--txt);outline:none"/>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:10px;color:var(--txt4);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Anon / Public Key</div>
+        <div style="position:relative">
+          <input id="sb-key-input" type="password" placeholder="eyJhbGci..." style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:11px 40px 11px 12px;font-size:13px;color:var(--txt);outline:none"/>
+          <button onclick="togglePwd('sb-key-input')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--txt4);font-size:15px">&#128065;</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="sb-save-btn" onclick="saveSupabaseCreds()" style="flex:1;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;font-size:14px">Save &amp; Connect</button>
+        <button onclick="syncNow()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt3);border-radius:10px;padding:12px 14px;font-weight:700;font-size:13px">Sync Now</button>
+      </div>
+    </div>
+    <div class="card">
       <div class="label-sm" style="color:var(--red);margin-bottom:14px">Danger Zone</div>
       <button onclick="clearData()" style="width:100%;background:transparent;border:1px solid var(--redbd);color:var(--red);border-radius:10px;padding:13px;font-weight:800;font-size:14px">Clear All Data</button>
     </div>
@@ -317,6 +339,135 @@ var WEEK=[{wId:4},{wId:null},{wId:null},{wId:0},{wId:1},{wId:2},{wId:3}];
 var DAYS=["MON","TUE","WED","THU","FRI","SAT","SUN"];
 function isBW(e){return e.cardio||e.bw||e.w===0}
 
+// ── SUPABASE LAYER ────────────────────────────────────────────────────────────
+var SB_URL='', SB_KEY='', DEVICE_ID='';
+
+function initSupabase(){
+  SB_URL=(localStorage.getItem("sbUrl")||"").replace(/\/$/,"");
+  SB_KEY=localStorage.getItem("sbKey")||"";
+  DEVICE_ID=localStorage.getItem("deviceId");
+  if(!DEVICE_ID){
+    DEVICE_ID="dev-"+Math.random().toString(36).slice(2)+Date.now().toString(36);
+    localStorage.setItem("deviceId",DEVICE_ID);
+  }
+  updateSbStatusBadge();
+}
+
+function sbReady(){return !!(SB_URL&&SB_KEY)}
+
+function sbH(){
+  return {"Content-Type":"application/json","apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Prefer":"return=representation"};
+}
+
+async function sbSelect(table,extra){
+  try{
+    var url=SB_URL+"/rest/v1/"+table+"?device_id=eq."+encodeURIComponent(DEVICE_ID)+(extra?"&"+extra:"");
+    var r=await fetch(url,{headers:sbH()});
+    if(!r.ok)return null;
+    return await r.json();
+  }catch(e){return null}
+}
+
+async function sbInsert(table,data){
+  try{
+    await fetch(SB_URL+"/rest/v1/"+table,{method:"POST",headers:sbH(),body:JSON.stringify(data)});
+  }catch(e){}
+}
+
+async function sbUpsert(table,data){
+  try{
+    var h=Object.assign({},sbH(),{"Prefer":"resolution=merge-duplicates,return=representation"});
+    await fetch(SB_URL+"/rest/v1/"+table,{method:"POST",headers:h,body:JSON.stringify(data)});
+  }catch(e){}
+}
+
+async function sbDeleteAll(table){
+  try{
+    await fetch(SB_URL+"/rest/v1/"+table+"?device_id=eq."+encodeURIComponent(DEVICE_ID),{method:"DELETE",headers:sbH()});
+  }catch(e){}
+}
+
+function updateSbStatusBadge(){
+  var el=document.getElementById("sb-status-badge");
+  if(!el)return;
+  if(sbReady()){
+    el.style.background="rgba(34,197,94,.15)";el.style.color="var(--grn)";el.textContent="Connected";
+  } else {
+    el.style.background="var(--bg3)";el.style.color="var(--txt4)";el.textContent="Not connected";
+  }
+}
+
+function saveSupabaseCreds(){
+  var url=document.getElementById("sb-url-input").value.trim();
+  var key=document.getElementById("sb-key-input").value.trim();
+  if(!url||!key){alert("Please enter both URL and key.");return}
+  localStorage.setItem("sbUrl",url);
+  localStorage.setItem("sbKey",key);
+  SB_URL=url.replace(/\/$/,"");SB_KEY=key;
+  updateSbStatusBadge();
+  var btn=document.getElementById("sb-save-btn");
+  btn.textContent="Saved!";
+  setTimeout(function(){btn.textContent="Save & Connect"},2000);
+  syncNow();
+}
+
+async function syncNow(){
+  if(!sbReady()){alert("Add your Supabase URL and key first.");return}
+  showToast("Syncing...");
+  await syncFromSupabase();
+  renderHome();
+  showToast("Synced!");
+}
+
+function showToast(msg){
+  var t=document.getElementById("toast");
+  if(!t){t=document.createElement("div");t.id="toast";t.style.cssText="position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:9999;pointer-events:none;transition:opacity .3s";document.body.appendChild(t)}
+  t.textContent=msg;t.style.opacity="1";
+  clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity="0"},2000);
+}
+
+async function syncFromSupabase(){
+  if(!sbReady())return;
+  try{
+    // History
+    var whData=await sbSelect("wh","order=created_at.desc&limit=100");
+    if(Array.isArray(whData)&&whData.length){
+      hist=whData.map(function(r){return{date:r.date,wId:r.wkt_id,wName:r.wkt_name,log:r.log||[]}});
+      localStorage.setItem("wh",JSON.stringify(hist));
+    }
+    // Suggestions
+    var swData=await sbSelect("sw","");
+    if(Array.isArray(swData)){
+      var newSugg={};
+      swData.forEach(function(r){newSugg[r.key]=r.value});
+      sugg=newSugg;localStorage.setItem("sw",JSON.stringify(sugg));
+    }
+    // Body weight
+    var bwData=await sbSelect("bwlog","order=created_at.desc&limit=52");
+    if(Array.isArray(bwData)&&bwData.length){
+      bwlog=bwData.map(function(r){return{date:r.date,w:r.weight}});
+      localStorage.setItem("bwlog",JSON.stringify(bwlog));
+    }
+    // PRs
+    var prData=await sbSelect("prs","");
+    if(Array.isArray(prData)){
+      var newPrs={};
+      prData.forEach(function(r){newPrs[r.exercise_name]=r.weight});
+      prs=newPrs;localStorage.setItem("prs",JSON.stringify(prs));
+    }
+    // Config
+    var cfgData=await sbSelect("cfg","");
+    if(Array.isArray(cfgData)){
+      cfgData.forEach(function(r){
+        var v=r.value;
+        if(v==="true")v=true;else if(v==="false")v=false;
+        cfg[r.key]=v;
+      });
+      localStorage.setItem("cfg",JSON.stringify(cfg));
+    }
+  }catch(e){console.warn("Supabase sync failed",e)}
+}
+
 // ── STORE ──────────────────────────────────────────────────────────────────────
 var hist,sugg,prs,bwlog,cfg;
 function loadStore(){
@@ -332,6 +483,31 @@ function persist(){
   localStorage.setItem("prs",JSON.stringify(prs));
   localStorage.setItem("bwlog",JSON.stringify(bwlog));
   localStorage.setItem("cfg",JSON.stringify(cfg));
+  if(sbReady())pushToSupabase();
+}
+
+async function pushToSupabase(){
+  try{
+    // Push latest history entry
+    if(hist.length){
+      var h=hist[0];
+      await sbInsert("wh",{device_id:DEVICE_ID,date:h.date,wkt_id:h.wId,wkt_name:h.wName,log:h.log});
+    }
+    // Push all suggestions (upsert)
+    var swRows=Object.entries(sugg).map(function(e){return{device_id:DEVICE_ID,key:e[0],value:e[1]}});
+    if(swRows.length)await sbUpsert("sw",swRows);
+    // Push all PRs (upsert)
+    var prRows=Object.entries(prs).map(function(e){return{device_id:DEVICE_ID,exercise_name:e[0],weight:e[1]}});
+    if(prRows.length)await sbUpsert("prs",prRows);
+    // Push latest bwlog entry
+    if(bwlog.length){
+      var bw=bwlog[0];
+      await sbInsert("bwlog",{device_id:DEVICE_ID,date:bw.date,weight:bw.w});
+    }
+    // Push cfg (upsert)
+    var cfgRows=Object.entries(cfg).map(function(e){return{device_id:DEVICE_ID,key:e[0],value:String(e[1])}});
+    if(cfgRows.length)await sbUpsert("cfg",cfgRows);
+  }catch(e){console.warn("Supabase push failed",e)}
 }
 function gsug(w,i){
   var v=sugg[w+"-"+i];
@@ -370,6 +546,9 @@ function nav(s){
   if(s==="home")renderHome();
   if(s==="settings"){
     document.getElementById("settings-key").value=localStorage.getItem("apiKey")||"";
+    document.getElementById("sb-url-input").value=localStorage.getItem("sbUrl")||"";
+    document.getElementById("sb-key-input").value=localStorage.getItem("sbKey")||"";
+    updateSbStatusBadge();
     renderSettingsToggles();
   }
 }
@@ -392,8 +571,12 @@ function saveSettingsKey(){
   setTimeout(function(){b.textContent="Save Key"},2000);
 }
 function clearData(){
-  if(confirm("Clear all workout history, weights and records?")){
-    hist=[];sugg={};prs={};bwlog=[];persist();alert("Cleared.");
+  if(confirm("Clear all workout history, weights and records? This will also clear your Supabase data.")){
+    hist=[];sugg={};prs={};bwlog=[];persist();
+    if(sbReady()){
+      sbDeleteAll("wh");sbDeleteAll("sw");sbDeleteAll("prs");sbDeleteAll("bwlog");sbDeleteAll("cfg");
+    }
+    alert("Cleared.");
   }
 }
 
@@ -973,9 +1156,15 @@ function closeWeeklyModal(){
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 loadStore();
+initSupabase();
 applyTheme();
 var ak=localStorage.getItem("apiKey");
-if(ak===null){nav("setup")}else{nav("home")}
+if(ak===null){nav("setup")}else{
+  nav("home");
+  if(sbReady()){
+    syncFromSupabase().then(function(){renderHome();showToast("Synced with database");});
+  }
+}
 </script>
 </body>
 </html>
