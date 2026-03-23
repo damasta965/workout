@@ -339,27 +339,66 @@ var WEEK=[{wId:4},{wId:null},{wId:null},{wId:0},{wId:1},{wId:2},{wId:3}];
 var DAYS=["MON","TUE","WED","THU","FRI","SAT","SUN"];
 function isBW(e){return e.cardio||e.bw||e.w===0}
 
-// ── SUPABASE LAYER ────────────────────────────────────────────────────────────
-var SB_URL='', SB_KEY='', DEVICE_ID='';
+// ── SUPABASE LAYER (with Anonymous Auth + RLS) ────────────────────────────────
+var SB_URL='', SB_KEY='', SB_TOKEN='', DEVICE_ID='';
 
 function initSupabase(){
   SB_URL=(localStorage.getItem("sbUrl")||"").replace(/\/$/,"");
   SB_KEY=localStorage.getItem("sbKey")||"";
-  DEVICE_ID=localStorage.getItem("deviceId");
-  if(!DEVICE_ID){
-    DEVICE_ID="dev-"+Math.random().toString(36).slice(2)+Date.now().toString(36);
-    localStorage.setItem("deviceId",DEVICE_ID);
-  }
   updateSbStatusBadge();
 }
 
 function sbReady(){return !!(SB_URL&&SB_KEY)}
 
+// Sign in anonymously — runs once per device, stores session, refreshes when expired
+async function sbAuth(){
+  if(!sbReady())return false;
+  var stored=localStorage.getItem("sbSession");
+  if(stored){
+    try{
+      var sess=JSON.parse(stored);
+      // Refresh if expiring within 5 minutes
+      if(sess.expires_at>Math.floor(Date.now()/1000)+300){
+        SB_TOKEN=sess.access_token;
+        DEVICE_ID=sess.user.id;
+        return true;
+      }
+      // Try refresh
+      var rr=await fetch(SB_URL+"/auth/v1/token?grant_type=refresh_token",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","apikey":SB_KEY},
+        body:JSON.stringify({refresh_token:sess.refresh_token})
+      });
+      if(rr.ok){
+        var rd=await rr.json();
+        SB_TOKEN=rd.access_token;DEVICE_ID=rd.user.id;
+        localStorage.setItem("sbSession",JSON.stringify(rd));
+        return true;
+      }
+    }catch(e){}
+  }
+  // Anonymous sign-in
+  try{
+    var r=await fetch(SB_URL+"/auth/v1/signup",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","apikey":SB_KEY},
+      body:JSON.stringify({})
+    });
+    if(!r.ok)return false;
+    var d=await r.json();
+    SB_TOKEN=d.access_token;DEVICE_ID=d.user.id;
+    localStorage.setItem("sbSession",JSON.stringify(d));
+    localStorage.setItem("deviceId",DEVICE_ID);
+    return true;
+  }catch(e){return false}
+}
+
 function sbH(){
-  return {"Content-Type":"application/json","apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Prefer":"return=representation"};
+  return {"Content-Type":"application/json","apikey":SB_KEY,"Authorization":"Bearer "+SB_TOKEN,"Prefer":"return=representation"};
 }
 
 async function sbSelect(table,extra){
+  if(!await sbAuth())return null;
   try{
     var url=SB_URL+"/rest/v1/"+table+"?device_id=eq."+encodeURIComponent(DEVICE_ID)+(extra?"&"+extra:"");
     var r=await fetch(url,{headers:sbH()});
@@ -369,19 +408,24 @@ async function sbSelect(table,extra){
 }
 
 async function sbInsert(table,data){
+  if(!await sbAuth())return;
   try{
+    data.device_id=DEVICE_ID;
     await fetch(SB_URL+"/rest/v1/"+table,{method:"POST",headers:sbH(),body:JSON.stringify(data)});
   }catch(e){}
 }
 
-async function sbUpsert(table,data){
+async function sbUpsert(table,rows){
+  if(!await sbAuth())return;
   try{
     var h=Object.assign({},sbH(),{"Prefer":"resolution=merge-duplicates,return=representation"});
-    await fetch(SB_URL+"/rest/v1/"+table,{method:"POST",headers:h,body:JSON.stringify(data)});
+    rows=rows.map(function(r){return Object.assign({},r,{device_id:DEVICE_ID})});
+    await fetch(SB_URL+"/rest/v1/"+table,{method:"POST",headers:h,body:JSON.stringify(rows)});
   }catch(e){}
 }
 
 async function sbDeleteAll(table){
+  if(!await sbAuth())return;
   try{
     await fetch(SB_URL+"/rest/v1/"+table+"?device_id=eq."+encodeURIComponent(DEVICE_ID),{method:"DELETE",headers:sbH()});
   }catch(e){}
@@ -401,19 +445,26 @@ function saveSupabaseCreds(){
   var url=document.getElementById("sb-url-input").value.trim();
   var key=document.getElementById("sb-key-input").value.trim();
   if(!url||!key){alert("Please enter both URL and key.");return}
-  localStorage.setItem("sbUrl",url);
-  localStorage.setItem("sbKey",key);
+  // New project — clear old session so we re-auth
+  if(url!==SB_URL||key!==SB_KEY)localStorage.removeItem("sbSession");
+  localStorage.setItem("sbUrl",url);localStorage.setItem("sbKey",key);
   SB_URL=url.replace(/\/$/,"");SB_KEY=key;
   updateSbStatusBadge();
   var btn=document.getElementById("sb-save-btn");
-  btn.textContent="Saved!";
-  setTimeout(function(){btn.textContent="Save & Connect"},2000);
-  syncNow();
+  btn.textContent="Connecting...";
+  sbAuth().then(function(ok){
+    btn.textContent=ok?"Connected!":"Save & Connect";
+    if(ok){syncNow();}
+    else alert("Could not connect. Check your URL and key.");
+    setTimeout(function(){btn.textContent="Save & Connect"},2500);
+  });
 }
 
 async function syncNow(){
   if(!sbReady()){alert("Add your Supabase URL and key first.");return}
   showToast("Syncing...");
+  var ok=await sbAuth();
+  if(!ok){showToast("Sync failed — check credentials");return}
   await syncFromSupabase();
   renderHome();
   showToast("Synced!");
@@ -429,39 +480,30 @@ function showToast(msg){
 async function syncFromSupabase(){
   if(!sbReady())return;
   try{
-    // History
     var whData=await sbSelect("wh","order=created_at.desc&limit=100");
     if(Array.isArray(whData)&&whData.length){
       hist=whData.map(function(r){return{date:r.date,wId:r.wkt_id,wName:r.wkt_name,log:r.log||[]}});
       localStorage.setItem("wh",JSON.stringify(hist));
     }
-    // Suggestions
-    var swData=await sbSelect("sw","");
+    var swData=await sbSelect("sw");
     if(Array.isArray(swData)){
-      var newSugg={};
-      swData.forEach(function(r){newSugg[r.key]=r.value});
-      sugg=newSugg;localStorage.setItem("sw",JSON.stringify(sugg));
+      var ns={};swData.forEach(function(r){ns[r.key]=r.value});
+      sugg=ns;localStorage.setItem("sw",JSON.stringify(sugg));
     }
-    // Body weight
     var bwData=await sbSelect("bwlog","order=created_at.desc&limit=52");
     if(Array.isArray(bwData)&&bwData.length){
       bwlog=bwData.map(function(r){return{date:r.date,w:r.weight}});
       localStorage.setItem("bwlog",JSON.stringify(bwlog));
     }
-    // PRs
-    var prData=await sbSelect("prs","");
+    var prData=await sbSelect("prs");
     if(Array.isArray(prData)){
-      var newPrs={};
-      prData.forEach(function(r){newPrs[r.exercise_name]=r.weight});
-      prs=newPrs;localStorage.setItem("prs",JSON.stringify(prs));
+      var np={};prData.forEach(function(r){np[r.exercise_name]=r.weight});
+      prs=np;localStorage.setItem("prs",JSON.stringify(prs));
     }
-    // Config
-    var cfgData=await sbSelect("cfg","");
+    var cfgData=await sbSelect("cfg");
     if(Array.isArray(cfgData)){
       cfgData.forEach(function(r){
-        var v=r.value;
-        if(v==="true")v=true;else if(v==="false")v=false;
-        cfg[r.key]=v;
+        var v=r.value;if(v==="true")v=true;else if(v==="false")v=false;cfg[r.key]=v;
       });
       localStorage.setItem("cfg",JSON.stringify(cfg));
     }
