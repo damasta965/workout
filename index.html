@@ -165,7 +165,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <button onclick="nav('settings')" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt3);border-radius:10px;width:36px;height:36px;font-size:17px;display:flex;align-items:center;justify-content:center">&#9881;</button>
       </div>
     </div>
-    <button id="soreness-btn" onclick="toggleSoreness()" style="border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt4)">&#128137; Feeling Good</button>
+    <button id="soreness-btn" onclick="toggleSoreness()" style="border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt4)">Feeling Good</button>
   </div>
   <div id="today-banner"></div>
   <div style="display:flex;border-bottom:1px solid var(--bdr);background:var(--bg1)">
@@ -265,7 +265,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div>
   <div style="height:3px;background:var(--bg3)"><div id="w-bar" style="height:100%;background:linear-gradient(90deg,var(--acc),#60a5fa);width:0%;transition:width .4s"></div></div>
   <div style="padding:14px">
-    <div id="soreness-banner" style="display:none;background:var(--yelbg);border:1px solid var(--yelbd);border-radius:10px;padding:9px 14px;margin-bottom:12px;font-size:12px;color:var(--yel)">&#128137; Soreness mode — weights reduced 10%</div>
+    <div id="soreness-banner" style="display:none;background:var(--yelbg);border:1px solid var(--yelbd);border-radius:10px;padding:9px 14px;margin-bottom:12px;font-size:12px;color:var(--yel)">Soreness mode active — weights reduced 10%</div>
     <div id="warmup-box" style="background:var(--yelbg);border:1px solid var(--yelbd);border-radius:12px;padding:14px;margin-bottom:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <div style="font-weight:800;color:var(--yel);font-size:13px;text-transform:uppercase;letter-spacing:1px">Warm-Up First</div>
@@ -772,8 +772,8 @@ function renderTodayBanner(){
 }
 function renderSorenessBtn(){
   var btn=document.getElementById('soreness-btn');
-  if(S.soreness){btn.style.background='rgba(251,191,36,.15)';btn.style.borderColor='var(--yelbd)';btn.style.color='var(--yel)';btn.textContent='&#128137; Soreness Mode ON';}
-  else{btn.style.background='var(--bg3)';btn.style.borderColor='var(--bdr2)';btn.style.color='var(--txt4)';btn.textContent='&#128137; Feeling Good';}
+  if(S.soreness){btn.style.background='rgba(251,191,36,.15)';btn.style.borderColor='var(--yelbd)';btn.style.color='var(--yel)';btn.textContent='Soreness Mode ON';}
+  else{btn.style.background='var(--bg3)';btn.style.borderColor='var(--bdr2)';btn.style.color='var(--txt4)';btn.textContent='Feeling Good';}
 }
 async function toggleSoreness(){
   S.soreness=!S.soreness;
