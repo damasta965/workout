@@ -505,17 +505,40 @@ function sbToken(){return (S.session&&S.session.access_token)||SB_KEY}
 function sbH(extra){return Object.assign({'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+sbToken()},extra||{})}
 
 async function sbSignUp(email,password){
-  var r=await fetch(SB_URL+'/auth/v1/signup',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify({email,password})});
+  // Clear any existing session first
+  S.session=null;localStorage.removeItem('sbSession');
+  var r=await fetch(SB_URL+'/auth/v1/signup',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_KEY},
+    body:JSON.stringify({email,password})
+  });
   var d=await r.json();
-  if(!r.ok||d.error||d.error_code){throw new Error(d.msg||d.message||d.error_description||d.error||'Sign up failed. Check your email and try again.')}
+  if(!r.ok){throw new Error(d.msg||d.message||d.error_description||d.error||'Sign up failed ('+r.status+'). Try again.')}
+  if(d.error||d.error_code){throw new Error(d.msg||d.message||d.error_description||String(d.error))}
   if(!d.access_token){throw new Error('Please check your email to confirm your account, then sign in.')}
+  // Verify the token actually works
+  var check=await fetch(SB_URL+'/auth/v1/user',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+d.access_token}});
+  if(!check.ok){throw new Error('Sign up failed — could not verify account. Please try again.')}
   S.session=d;localStorage.setItem('sbSession',JSON.stringify(d));return d;
 }
+
 async function sbSignIn(email,password){
-  var r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify({email,password})});
+  // Clear any existing session first
+  S.session=null;localStorage.removeItem('sbSession');
+  var r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SB_KEY},
+    body:JSON.stringify({email,password})
+  });
   var d=await r.json();
-  if(!r.ok||d.error||d.error_code){throw new Error(d.msg||d.message||d.error_description||d.error||'Invalid email or password.')}
+  if(!r.ok){throw new Error(d.msg||d.message||d.error_description||d.error||'Incorrect email or password.')}
+  if(d.error||d.error_code){throw new Error(d.msg||d.message||d.error_description||String(d.error))}
   if(!d.access_token){throw new Error('Sign in failed — no session returned.')}
+  // Verify the token actually works against the real Supabase user endpoint
+  var check=await fetch(SB_URL+'/auth/v1/user',{headers:{'apikey':SB_KEY,'Authorization':'Bearer '+d.access_token}});
+  if(!check.ok){throw new Error('Sign in failed — could not verify credentials. Please try again.')}
+  var user=await check.json();
+  if(!user.id){throw new Error('Sign in failed — invalid user. Please try again.')}
   S.session=d;localStorage.setItem('sbSession',JSON.stringify(d));return d;
 }
 async function sbSignOut(){
@@ -619,13 +642,15 @@ async function doAuth(){
   err.textContent='';
   if(!email||!pwd){err.textContent='Please enter your email and password.';return}
   if(pwd.length<6){err.textContent='Password must be at least 6 characters.';return}
+  // Always wipe any existing session before a fresh auth attempt
+  S.session=null;localStorage.removeItem('sbSession');
   var btn=document.getElementById('auth-btn');
   btn.textContent='...';btn.disabled=true;
   try{
     if(authMode==='up') await sbSignUp(email,pwd);
     else await sbSignIn(email,pwd);
-    // Only proceed if we have a valid session
-    if(!S.session||!S.session.access_token){
+    // Hard gate — must have a real verified session to proceed
+    if(!S.session||!S.session.access_token||!S.session.user){
       err.textContent='Authentication failed. Please try again.';
       btn.textContent=authMode==='in'?'Sign In':'Create Account';btn.disabled=false;
       return;
