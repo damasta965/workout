@@ -505,16 +505,17 @@ function sbToken(){return (S.session&&S.session.access_token)||SB_KEY}
 function sbH(extra){return Object.assign({'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+sbToken()},extra||{})}
 
 async function sbSignUp(email,password){
-  var r=await fetch(SB_URL+'/auth/v1/signup',{method:'POST',headers:sbH(),body:JSON.stringify({email,password})});
+  var r=await fetch(SB_URL+'/auth/v1/signup',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify({email,password})});
   var d=await r.json();
-  if(d.error)throw new Error(d.error.message||d.error_description||'Signup failed');
-  if(!d.access_token)throw new Error('Check your email to confirm your account, then sign in.');
+  if(!r.ok||d.error||d.error_code){throw new Error(d.msg||d.message||d.error_description||d.error||'Sign up failed. Check your email and try again.')}
+  if(!d.access_token){throw new Error('Please check your email to confirm your account, then sign in.')}
   S.session=d;localStorage.setItem('sbSession',JSON.stringify(d));return d;
 }
 async function sbSignIn(email,password){
-  var r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:sbH(),body:JSON.stringify({email,password})});
+  var r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},body:JSON.stringify({email,password})});
   var d=await r.json();
-  if(d.error)throw new Error(d.error.message||d.error_description||'Sign in failed');
+  if(!r.ok||d.error||d.error_code){throw new Error(d.msg||d.message||d.error_description||d.error||'Invalid email or password.')}
+  if(!d.access_token){throw new Error('Sign in failed — no session returned.')}
   S.session=d;localStorage.setItem('sbSession',JSON.stringify(d));return d;
 }
 async function sbSignOut(){
@@ -522,17 +523,24 @@ async function sbSignOut(){
   S.session=null;localStorage.removeItem('sbSession');
 }
 async function sbRestoreSession(){
-  var stored=localStorage.getItem('sbSession');if(!stored)return false;
+  var stored=localStorage.getItem('sbSession');
+  if(!stored)return false;
   try{
     var sess=JSON.parse(stored);
+    if(!sess.access_token||!sess.user){localStorage.removeItem('sbSession');return false}
     var exp=sess.expires_at||0;
     if(exp>Math.floor(Date.now()/1000)+60){S.session=sess;return true}
-    var r=await fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:sbH(),body:JSON.stringify({refresh_token:sess.refresh_token})});
+    // Try refresh
+    var r=await fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SB_KEY},
+      body:JSON.stringify({refresh_token:sess.refresh_token})
+    });
     if(!r.ok){localStorage.removeItem('sbSession');return false}
     var d=await r.json();
-    if(d.error){localStorage.removeItem('sbSession');return false}
+    if(!d.access_token||d.error){localStorage.removeItem('sbSession');return false}
     S.session=d;localStorage.setItem('sbSession',JSON.stringify(d));return true;
-  }catch(e){return false}
+  }catch(e){localStorage.removeItem('sbSession');return false}
 }
 
 // DB helpers
@@ -608,15 +616,27 @@ async function doAuth(){
   var email=document.getElementById('auth-email').value.trim();
   var pwd=document.getElementById('auth-pwd').value;
   var err=document.getElementById('auth-err');
-  if(!email||!pwd){err.textContent='Please fill in all fields.';return}
+  err.textContent='';
+  if(!email||!pwd){err.textContent='Please enter your email and password.';return}
+  if(pwd.length<6){err.textContent='Password must be at least 6 characters.';return}
   var btn=document.getElementById('auth-btn');
-  btn.textContent='...';btn.disabled=true;err.textContent='';
+  btn.textContent='...';btn.disabled=true;
   try{
-    if(authMode==='up')await sbSignUp(email,pwd);
+    if(authMode==='up') await sbSignUp(email,pwd);
     else await sbSignIn(email,pwd);
+    // Only proceed if we have a valid session
+    if(!S.session||!S.session.access_token){
+      err.textContent='Authentication failed. Please try again.';
+      btn.textContent=authMode==='in'?'Sign In':'Create Account';btn.disabled=false;
+      return;
+    }
     await afterAuth();
-  }catch(e){err.textContent=e.message||'Authentication failed.';}
-  btn.textContent=authMode==='in'?'Sign In':'Sign Up';btn.disabled=false;
+  }catch(e){
+    S.session=null;
+    localStorage.removeItem('sbSession');
+    err.textContent=e.message||'Authentication failed. Please try again.';
+    btn.textContent=authMode==='in'?'Sign In':'Create Account';btn.disabled=false;
+  }
 }
 async function afterAuth(){
   await loadAll();
