@@ -2,69 +2,55 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="My Workout"/>
-<meta name="application-name" content="My Workout"/>
-<meta name="theme-color" content="#0a0a0f"/>
 <title>My Workout</title>
 <script>
-// Generate icon on canvas and inject PWA manifest so Chrome uses it on home screen
 (function(){
   var c=document.createElement("canvas");c.width=512;c.height=512;
   var x=c.getContext("2d");
-  // Background
-  var g=x.createLinearGradient(0,0,512,512);
-  g.addColorStop(0,"#1a3a6e");g.addColorStop(1,"#0a1628");
+  var g=x.createLinearGradient(0,0,512,512);g.addColorStop(0,"#1a3a6e");g.addColorStop(1,"#0a1628");
   x.fillStyle=g;x.beginPath();x.roundRect(0,0,512,512,96);x.fill();
-  // Draw dumbbell
-  x.fillStyle="#3b82f6";
-  // left plate outer
-  x.beginPath();x.roundRect(48,176,88,160,18);x.fill();
-  // left plate inner
-  x.fillStyle="#60a5fa";
-  x.beginPath();x.roundRect(116,204,28,104,8);x.fill();
-  // bar
-  x.fillStyle="#93c5fd";
-  x.beginPath();x.roundRect(144,236,224,40,10);x.fill();
-  // right plate inner
-  x.fillStyle="#60a5fa";
-  x.beginPath();x.roundRect(368,204,28,104,8);x.fill();
-  // right plate outer
-  x.fillStyle="#3b82f6";
-  x.beginPath();x.roundRect(376,176,88,160,18);x.fill();
-  // shine
-  x.fillStyle="rgba(255,255,255,0.07)";
-  x.beginPath();x.ellipse(200,140,160,60,0,0,Math.PI*2);x.fill();
-
+  x.fillStyle="#3b82f6";x.beginPath();x.roundRect(48,176,88,160,18);x.fill();
+  x.fillStyle="#60a5fa";x.beginPath();x.roundRect(116,204,28,104,8);x.fill();
+  x.fillStyle="#93c5fd";x.beginPath();x.roundRect(144,236,224,40,10);x.fill();
+  x.fillStyle="#60a5fa";x.beginPath();x.roundRect(368,204,28,104,8);x.fill();
+  x.fillStyle="#3b82f6";x.beginPath();x.roundRect(376,176,88,160,18);x.fill();
   var ico=c.toDataURL("image/png");
-
-  // Apple touch icon
-  var lnk=document.createElement("link");
-  lnk.rel="apple-touch-icon";lnk.href=ico;
-  document.head.appendChild(lnk);
-
-  // PWA manifest
-  var manifest={name:"My Workout",short_name:"My Workout",start_url:".",display:"standalone",background_color:"#0a0a0f",theme_color:"#0a0a0f",icons:[{src:ico,sizes:"512x512",type:"image/png",purpose:"any maskable"}]};
-  var blob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
-  var murl=URL.createObjectURL(blob);
-  var ml=document.createElement("link");ml.rel="manifest";ml.href=murl;
-  document.head.appendChild(ml);
+  var l=document.createElement("link");l.rel="apple-touch-icon";l.href=ico;document.head.appendChild(l);
+  var m={name:"My Workout",short_name:"My Workout",start_url:".",display:"standalone",background_color:"#0a0a0f",theme_color:"#0a0a0f",icons:[{src:ico,sizes:"512x512",type:"image/png",purpose:"any maskable"}]};
+  var ml=document.createElement("link");ml.rel="manifest";ml.href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:"application/json"}));document.head.appendChild(ml);
 })();
 </script>
 <style>
+:root{--bg0:#0a0a0f;--bg1:#0d1020;--bg2:#0f1525;--bg3:#111827;--bg4:#070d1f;--bg5:#0a1628;--bdr:#1a2540;--bdr2:#1e2d4a;--txt:#ffffff;--txt2:#c8d4f0;--txt3:#889;--txt4:#556;--txt5:#445;--acc:#3b82f6;--acc2:#2563eb;--acc3:#1d4ed8;--grn:#22c55e;--grn2:#16a34a;--grn3:#15803d;--yel:#fbbf24;--yelbg:#1a1500;--yelbd:#3d2e00;--red:#e11d48;--redbg:#1a0510;--redbd:#3a1020;--hdr:linear-gradient(135deg,#0f1729,#1a2340);--hdr2:linear-gradient(135deg,#052010,#0a1a08);--card-accent:linear-gradient(180deg,#3b82f6,#1d4ed8);}
+html.light{--bg0:#f0f4ff;--bg1:#e4ecff;--bg2:#ffffff;--bg3:#e8eeff;--bg4:#eef4ff;--bg5:#dde8ff;--bdr:#c0d0f0;--bdr2:#a8c0e8;--txt:#0a0a20;--txt2:#1a2a50;--txt3:#445;--txt4:#667;--txt5:#778;--acc:#2563eb;--acc2:#1d4ed8;--acc3:#1e40af;--grn:#16a34a;--grn2:#15803d;--grn3:#166534;--yel:#d97706;--yelbg:#fffbeb;--yelbd:#fde68a;--red:#dc2626;--redbg:#fff0f0;--redbd:#fca5a5;--hdr:linear-gradient(135deg,#dde8ff,#c8d8ff);--hdr2:linear-gradient(135deg,#d4fde4,#b8f0cc);--card-accent:linear-gradient(180deg,#2563eb,#1d4ed8);}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{background:#0a0a0f;min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;color:#fff}
-input[type=number]{-moz-appearance:textfield}
-input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
-::-webkit-scrollbar{width:0}
+html,body{background:var(--bg0);min-height:100vh;font-family:'Segoe UI',system-ui,sans-serif;color:var(--txt);transition:background .2s,color .2s}
 .screen{display:none;max-width:420px;margin:0 auto;min-height:100vh}
 .screen.active{display:block}
 button{cursor:pointer;font-family:inherit}
+input{font-family:inherit}
+textarea{font-family:inherit;resize:none}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+::-webkit-scrollbar{width:0}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes spin{to{transform:rotate(360deg)}}
-.pulse-dot{width:10px;height:10px;border-radius:50%;background:#3b82f6;animation:pulse 1s infinite;display:inline-block}
+@keyframes pop{0%{transform:scale(.8);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.pulse-dot{width:10px;height:10px;border-radius:50%;background:var(--acc);animation:pulse 1s infinite;display:inline-block;flex-shrink:0}
+.pop{animation:pop .4s ease forwards}
+.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:16px}
+.btn-primary{background:linear-gradient(135deg,var(--acc2),var(--acc3));color:#fff;border:none;border-radius:14px;padding:17px;font-weight:900;font-size:16px;text-transform:uppercase;letter-spacing:1px;box-shadow:0 6px 20px rgba(37,99,235,.35);width:100%}
+.btn-secondary{background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt3);border-radius:10px;padding:10px 16px;font-weight:700;font-size:13px}
+.topbar{background:var(--bg1);padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:10}
+.back-btn{background:var(--bg3);border:none;color:var(--txt3);border-radius:8px;width:36px;height:36px;font-size:18px;display:flex;align-items:center;justify-content:center}
+.label-sm{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--acc)}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;flex-direction:column;justify-content:flex-end}
+.modal-sheet{position:relative;background:var(--bg1);border-radius:20px 20px 0 0;border:1px solid var(--bdr);border-bottom:none;max-height:88vh;display:flex;flex-direction:column;max-width:420px;margin:0 auto;width:100%}
+.modal-handle{width:36px;height:4px;background:var(--bdr2);border-radius:2px;margin:0 auto 16px}
+.pill-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700}
 </style>
 </head>
 <body>
@@ -72,133 +58,208 @@ button{cursor:pointer;font-family:inherit}
 <!-- SETUP -->
 <div id="screen-setup" class="screen">
   <div style="padding:40px 24px;display:flex;flex-direction:column;justify-content:center;min-height:100vh">
-    <div style="font-size:10px;font-weight:700;letter-spacing:3px;color:#3b82f6;text-transform:uppercase;margin-bottom:10px">One-Time Setup</div>
-    <div style="font-size:26px;font-weight:900;margin-bottom:10px;line-height:1.2">Add Your API Key</div>
-    <div style="font-size:14px;color:#667;line-height:1.7;margin-bottom:28px">The AI coach needs an Anthropic API key to analyze your workouts. Your key is stored only on this device.</div>
-    <div style="font-size:11px;color:#556;margin-bottom:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase">Anthropic API Key</div>
+    <div class="label-sm" style="margin-bottom:10px">One-Time Setup</div>
+    <div style="font-size:26px;font-weight:900;margin-bottom:10px;line-height:1.2;color:var(--txt)">Add Your API Key</div>
+    <div style="font-size:14px;color:var(--txt4);line-height:1.7;margin-bottom:28px">The AI coach needs an Anthropic API key. Stored only on this device, never shared.</div>
+    <div class="label-sm" style="margin-bottom:8px">Anthropic API Key</div>
     <div style="position:relative;margin-bottom:10px">
-      <input id="setup-key" type="password" placeholder="sk-ant-..." style="width:100%;background:#111827;border:1px solid #1e2d4a;border-radius:12px;padding:14px 44px 14px 14px;font-size:14px;color:#fff;outline:none"/>
-      <button onclick="togglePwd('setup-key')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#445;font-size:16px">👁</button>
+      <input id="setup-key" type="password" placeholder="sk-ant-..." style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:12px;padding:14px 44px 14px 14px;font-size:14px;color:var(--txt);outline:none"/>
+      <button onclick="togglePwd('setup-key')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--txt4);font-size:16px">&#128065;</button>
     </div>
-    <div style="font-size:12px;color:#445;margin-bottom:28px">Get a free key at <span style="color:#3b82f6">console.anthropic.com</span> → API Keys</div>
-    <button onclick="saveSetupKey()" style="width:100%;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:14px;padding:17px;font-weight:900;font-size:16px;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;box-shadow:0 6px 20px rgba(37,99,235,.4)">Save &amp; Continue</button>
-    <button onclick="skipSetup()" style="width:100%;background:transparent;color:#445;border:1px solid #1a2030;border-radius:14px;padding:14px;font-weight:700;font-size:14px">Skip — Use Without AI</button>
+    <div style="font-size:12px;color:var(--txt5);margin-bottom:28px">Get a free key at <span style="color:var(--acc)">console.anthropic.com</span> &#8594; API Keys</div>
+    <button onclick="saveSetupKey()" class="btn-primary" style="margin-bottom:14px">Save &amp; Continue</button>
+    <button onclick="skipSetup()" style="width:100%;background:transparent;color:var(--txt5);border:1px solid var(--bdr);border-radius:14px;padding:14px;font-weight:700;font-size:14px">Skip &#8212; Use Without AI</button>
   </div>
 </div>
 
 <!-- HOME -->
 <div id="screen-home" class="screen">
-  <div style="background:linear-gradient(135deg,#0f1729,#1a2340);padding:28px 20px 20px;border-bottom:1px solid #1e2a45">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+  <div style="background:var(--hdr);padding:20px 20px 16px;border-bottom:1px solid var(--bdr)">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
       <div>
-        <div style="font-size:11px;font-weight:700;letter-spacing:3px;color:#4a7fd4;margin-bottom:4px;text-transform:uppercase">Workout Tracker</div>
-        <div style="font-size:24px;font-weight:800;line-height:1.1">My Regimen</div>
-        <div style="font-size:12px;color:#556080;margin-top:4px">40 yo · 235 lbs · Muscle + Fat Burn</div>
+        <div class="label-sm" style="margin-bottom:4px">Workout Tracker</div>
+        <div style="font-size:22px;font-weight:900;line-height:1.1;color:var(--txt)">My Regimen</div>
+        <div style="font-size:12px;color:var(--txt4);margin-top:3px">40 yo &#183; 235 lbs &#183; Muscle + Fat Burn</div>
       </div>
-      <button onclick="nav('settings')" style="background:#1a2030;border:1px solid #1e2d4a;color:#4a7fd4;border-radius:10px;width:38px;height:38px;font-size:18px;display:flex;align-items:center;justify-content:center">&#9881;</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div id="streak-badge" style="display:none"></div>
+        <button onclick="nav('settings')" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--acc);border-radius:10px;width:38px;height:38px;font-size:18px;display:flex;align-items:center;justify-content:center">&#9881;</button>
+      </div>
+    </div>
+    <div id="soreness-row" style="display:flex;align-items:center;gap:8px">
+      <button id="soreness-btn" onclick="toggleSoreness()" style="border-radius:20px;padding:5px 12px;font-size:12px;font-weight:700;border:1px solid var(--bdr2);background:var(--bg3);color:var(--txt4)">&#128137; Feeling Good</button>
     </div>
   </div>
-  <div style="display:flex;border-bottom:1px solid #1a2030;background:#0d1020">
-    <button id="tb-today" onclick="switchTab('today')" style="flex:1;padding:14px;border:none;background:transparent;color:#4a9eff;font-weight:700;font-size:13px;border-bottom:2px solid #4a9eff;letter-spacing:1px;text-transform:uppercase">Today</button>
-    <button id="tb-history" onclick="switchTab('history')" style="flex:1;padding:14px;border:none;background:transparent;color:#445;font-weight:700;font-size:13px;border-bottom:2px solid transparent;letter-spacing:1px;text-transform:uppercase">History</button>
+  <div id="today-banner" style="display:none"></div>
+  <div style="display:flex;border-bottom:1px solid var(--bdr);background:var(--bg1)">
+    <button id="tb-today" onclick="switchTab('today')" style="flex:1;padding:13px;border:none;background:transparent;color:var(--acc);font-weight:700;font-size:12px;border-bottom:2px solid var(--acc);letter-spacing:1px;text-transform:uppercase">Today</button>
+    <button id="tb-history" onclick="switchTab('history')" style="flex:1;padding:13px;border:none;background:transparent;color:var(--txt4);font-weight:700;font-size:12px;border-bottom:2px solid transparent;letter-spacing:1px;text-transform:uppercase">History</button>
+    <button id="tb-weight" onclick="switchTab('weight')" style="flex:1;padding:13px;border:none;background:transparent;color:var(--txt4);font-weight:700;font-size:12px;border-bottom:2px solid transparent;letter-spacing:1px;text-transform:uppercase">Weight</button>
   </div>
-  <div id="tab-today-pane" style="padding:16px 16px 40px">
-    <div id="week-strip" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:20px"></div>
+  <div id="tab-today-pane" style="padding:14px 14px 40px">
+    <div id="week-strip" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px"></div>
     <div id="workout-cards" style="display:flex;flex-direction:column;gap:10px"></div>
   </div>
-  <div id="tab-history-pane" style="padding:16px;display:none"><div id="history-list"></div></div>
+  <div id="tab-history-pane" style="padding:14px;display:none"><div id="history-list"></div></div>
+  <div id="tab-weight-pane" style="padding:14px;display:none">
+    <div class="card" style="margin-bottom:14px">
+      <div class="label-sm" style="margin-bottom:12px">Log Weight</div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:flex-end">
+        <div>
+          <div style="font-size:10px;color:var(--txt4);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Today's Weight (lbs)</div>
+          <input id="bw-input" type="number" inputmode="decimal" placeholder="235" style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:12px;font-size:22px;font-weight:900;color:var(--txt);outline:none;text-align:center"/>
+        </div>
+        <button onclick="logBodyWeight()" style="background:linear-gradient(135deg,var(--acc2),var(--acc3));color:#fff;border:none;border-radius:10px;padding:12px 16px;font-weight:800;font-size:14px;height:50px">Log</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="label-sm" style="margin-bottom:12px">Progress Chart</div>
+      <canvas id="bw-chart" width="360" height="160" style="width:100%;display:block"></canvas>
+      <div id="bw-stats" style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap"></div>
+    </div>
+    <div id="bw-log-list"></div>
+  </div>
 </div>
 
 <!-- PREVIEW MODAL -->
-<div id="preview-modal" style="display:none;position:fixed;inset:0;z-index:100;flex-direction:column;justify-content:flex-end">
+<div id="preview-modal" class="modal-overlay">
   <div onclick="closePreview()" style="position:absolute;inset:0;background:rgba(0,0,0,.75)"></div>
-  <div style="position:relative;background:#0d1120;border-radius:20px 20px 0 0;border:1px solid #1a2540;border-bottom:none;max-height:88vh;display:flex;flex-direction:column;max-width:420px;margin:0 auto;width:100%">
-    <div id="preview-header" style="padding:20px 20px 14px;border-bottom:1px solid #151f35;flex-shrink:0"></div>
+  <div class="modal-sheet">
+    <div id="preview-header" style="padding:20px 20px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0"></div>
     <div id="preview-body" style="overflow-y:auto;padding:16px 20px 24px;flex:1"></div>
-    <div style="padding:14px 20px 28px;border-top:1px solid #151f35;flex-shrink:0;background:#0d1120">
-      <button onclick="startFromPreview()" style="width:100%;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:14px;padding:17px;font-weight:900;font-size:16px;text-transform:uppercase;letter-spacing:1px;box-shadow:0 6px 20px rgba(37,99,235,.4)">Start Workout</button>
+    <div style="padding:14px 20px 28px;border-top:1px solid var(--bdr);flex-shrink:0;background:var(--bg1)">
+      <button onclick="startFromPreview()" class="btn-primary">Start Workout</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRE-WORKOUT BRIEF MODAL -->
+<div id="brief-modal" class="modal-overlay">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.8)"></div>
+  <div class="modal-sheet" style="max-height:75vh">
+    <div style="padding:20px 20px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0">
+      <div class="modal-handle"></div>
+      <div class="label-sm" style="margin-bottom:6px">AI Pre-Workout Brief</div>
+      <div id="brief-wkt-name" style="font-size:18px;font-weight:900;color:var(--txt)"></div>
+    </div>
+    <div style="overflow-y:auto;padding:16px 20px;flex:1">
+      <div id="brief-loading" style="display:flex;gap:10px;align-items:center;color:var(--txt4);font-size:13px;padding:10px 0"><span class="pulse-dot"></span>&nbsp;Preparing your brief...</div>
+      <div id="brief-text" style="display:none;font-size:13px;color:var(--txt2);line-height:1.75;white-space:pre-wrap"></div>
+    </div>
+    <div style="padding:14px 20px 28px;border-top:1px solid var(--bdr);flex-shrink:0;background:var(--bg1);display:flex;gap:10px">
+      <button onclick="skipBrief()" style="flex:0 0 auto;background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt4);border-radius:12px;padding:14px 18px;font-weight:700;font-size:14px">Skip</button>
+      <button id="letsgo-btn" onclick="closeBriefAndStart()" style="flex:1;background:linear-gradient(135deg,var(--acc2),var(--acc3));color:#fff;border:none;border-radius:12px;padding:14px;font-weight:900;font-size:15px;box-shadow:0 4px 15px rgba(37,99,235,.35)">Let's Go!</button>
+    </div>
+  </div>
+</div>
+
+<!-- WEEKLY REVIEW MODAL -->
+<div id="weekly-modal" class="modal-overlay">
+  <div onclick="closeWeeklyModal()" style="position:absolute;inset:0;background:rgba(0,0,0,.8)"></div>
+  <div class="modal-sheet" style="max-height:82vh">
+    <div style="padding:20px 20px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0">
+      <div class="modal-handle"></div>
+      <div class="label-sm" style="color:var(--grn);margin-bottom:6px">Weekly Complete!</div>
+      <div style="font-size:20px;font-weight:900;color:var(--txt)">AI Weekly Review</div>
+    </div>
+    <div style="overflow-y:auto;padding:16px 20px;flex:1">
+      <div id="weekly-loading" style="display:flex;gap:10px;align-items:center;color:var(--txt4);font-size:13px"><span class="pulse-dot"></span>&nbsp;Analyzing your week...</div>
+      <div id="weekly-text" style="display:none;font-size:13px;color:var(--txt2);line-height:1.75;white-space:pre-wrap"></div>
+    </div>
+    <div style="padding:14px 20px 28px;border-top:1px solid var(--bdr);flex-shrink:0;background:var(--bg1)">
+      <button onclick="closeWeeklyModal()" class="btn-primary">Back to Home</button>
     </div>
   </div>
 </div>
 
 <!-- SETTINGS -->
 <div id="screen-settings" class="screen">
-  <div style="background:#0d1020;padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #1a2030">
-    <button onclick="nav('home')" style="background:#1a2030;border:none;color:#889;border-radius:8px;width:36px;height:36px;font-size:18px;display:flex;align-items:center;justify-content:center">&#8592;</button>
-    <div style="font-size:16px;font-weight:800">Settings</div>
+  <div class="topbar">
+    <button onclick="nav('home')" class="back-btn">&#8592;</button>
+    <div style="font-size:16px;font-weight:800;color:var(--txt)">Settings</div>
   </div>
-  <div style="padding:20px">
-    <div style="background:#0f1525;border:1px solid #1a2540;border-radius:14px;padding:18px;margin-bottom:16px">
-      <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#3b82f6;text-transform:uppercase;margin-bottom:14px">AI Coach — API Key</div>
-      <div style="font-size:12px;color:#556;margin-bottom:14px;line-height:1.6">Stored on this device only. Get one free at console.anthropic.com → API Keys.</div>
+  <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+    <div class="card">
+      <div class="label-sm" style="margin-bottom:14px">AI Coach &#8212; API Key</div>
+      <div style="font-size:12px;color:var(--txt4);margin-bottom:14px;line-height:1.6">Stored on this device only. Get one free at console.anthropic.com &#8594; API Keys.</div>
       <div style="position:relative;margin-bottom:12px">
-        <input id="settings-key" type="password" placeholder="sk-ant-..." style="width:100%;background:#111827;border:1px solid #1e2d4a;border-radius:10px;padding:12px 40px 12px 12px;font-size:13px;color:#fff;outline:none"/>
-        <button onclick="togglePwd('settings-key')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#445;font-size:15px">👁</button>
+        <input id="settings-key" type="password" placeholder="sk-ant-..." style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:12px 40px 12px 12px;font-size:13px;color:var(--txt);outline:none"/>
+        <button onclick="togglePwd('settings-key')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--txt4);font-size:15px">&#128065;</button>
       </div>
-      <button id="save-key-btn" onclick="saveSettingsKey()" style="width:100%;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:14px">Save Key</button>
+      <button id="save-key-btn" onclick="saveSettingsKey()" style="width:100%;background:linear-gradient(135deg,var(--acc2),var(--acc3));color:#fff;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:14px">Save Key</button>
     </div>
-    <div style="background:#0f1525;border:1px solid #1a2540;border-radius:14px;padding:18px">
-      <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#e11d48;text-transform:uppercase;margin-bottom:14px">Danger Zone</div>
-      <button onclick="clearData()" style="width:100%;background:transparent;border:1px solid #3a1020;color:#e11d48;border-radius:10px;padding:13px;font-weight:800;font-size:14px">Clear All Data</button>
+    <div class="card">
+      <div class="label-sm" style="margin-bottom:14px">Preferences</div>
+      <div id="settings-toggles" style="display:flex;flex-direction:column;gap:0"></div>
+    </div>
+    <div class="card">
+      <div class="label-sm" style="color:var(--red);margin-bottom:14px">Danger Zone</div>
+      <button onclick="clearData()" style="width:100%;background:transparent;border:1px solid var(--redbd);color:var(--red);border-radius:10px;padding:13px;font-weight:800;font-size:14px">Clear All Data</button>
     </div>
   </div>
 </div>
 
 <!-- WORKOUT -->
 <div id="screen-workout" class="screen">
-  <div style="background:#0d1020;padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #1a2030;position:sticky;top:0;z-index:10">
-    <button onclick="nav('home')" style="background:#1a2030;border:none;color:#889;border-radius:8px;width:36px;height:36px;font-size:18px;display:flex;align-items:center;justify-content:center">&#8592;</button>
+  <div class="topbar">
+    <button onclick="nav('home')" class="back-btn">&#8592;</button>
     <div style="flex:1">
-      <div id="w-title" style="font-size:14px;font-weight:800"></div>
-      <div id="w-sub" style="font-size:11px;color:#556"></div>
+      <div id="w-title" style="font-size:14px;font-weight:800;color:var(--txt)"></div>
+      <div id="w-sub" style="font-size:11px;color:var(--txt4)"></div>
     </div>
-    <div id="w-pct" style="font-size:12px;font-weight:700;color:#3b82f6"></div>
+    <div id="w-pct" style="font-size:12px;font-weight:700;color:var(--acc)"></div>
   </div>
-  <div style="height:3px;background:#111827"><div id="w-bar" style="height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);width:0%;transition:width .4s ease"></div></div>
-  <div style="padding:16px">
-    <div id="warmup-box" style="background:#1a1500;border:1px solid #3d2e00;border-radius:12px;padding:14px;margin-bottom:14px">
+  <div style="height:3px;background:var(--bg3)"><div id="w-bar" style="height:100%;background:linear-gradient(90deg,var(--acc),#60a5fa);width:0%;transition:width .4s ease"></div></div>
+  <div style="padding:14px">
+    <div id="soreness-banner" style="display:none;background:var(--yelbg);border:1px solid var(--yelbd);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--yel)">&#128137; Soreness mode active &#8212; weights reduced 10%. Listen to your body.</div>
+    <div id="warmup-box" style="background:var(--yelbg);border:1px solid var(--yelbd);border-radius:12px;padding:14px;margin-bottom:14px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div style="font-weight:800;color:#fbbf24;font-size:13px;letter-spacing:1px;text-transform:uppercase">Warm-Up First</div>
-        <button onclick="dismissWarmup()" style="background:#2a2000;border:1px solid #3d2e00;color:#fbbf24;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700">Done</button>
+        <div style="font-weight:800;color:var(--yel);font-size:13px;letter-spacing:1px;text-transform:uppercase">Warm-Up First</div>
+        <button onclick="dismissWarmup()" style="background:rgba(251,191,36,.15);border:1px solid var(--yelbd);color:var(--yel);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700">Done</button>
       </div>
       <div id="warmup-items"></div>
     </div>
-    <div id="rest-box" style="display:none;background:#0a1628;border:1px solid #1e4080;border-radius:16px;padding:28px 20px;text-align:center;margin-bottom:14px">
-      <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#4a7fd4;text-transform:uppercase;margin-bottom:8px">Rest</div>
+    <div id="rest-box" style="display:none;background:var(--bg5);border:1px solid #1e4080;border-radius:16px;padding:28px 20px;text-align:center;margin-bottom:14px">
+      <div class="label-sm" style="margin-bottom:8px">Rest</div>
       <div id="rest-timer" style="font-size:64px;font-weight:900;color:#60a5fa;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums;margin-bottom:6px">—</div>
-      <div id="rest-next" style="font-size:12px;color:#445;margin-bottom:20px"></div>
-      <button onclick="skipRest()" style="background:#1a2540;border:1px solid #2d3d60;color:#889;border-radius:10px;padding:10px 24px;font-weight:700;font-size:13px">Skip Rest</button>
+      <div id="rest-next" style="font-size:12px;color:var(--txt4);margin-bottom:20px"></div>
+      <button onclick="skipRest()" class="btn-secondary">Skip Rest</button>
     </div>
     <div id="ex-box">
-      <div style="background:#0f1525;border:1px solid #1a2540;border-radius:16px;padding:18px;margin-bottom:14px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div class="card" style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
           <div>
-            <div id="ex-label" style="font-size:10px;font-weight:700;letter-spacing:2px;color:#3b82f6;text-transform:uppercase;margin-bottom:4px"></div>
-            <div id="ex-name" style="font-size:20px;font-weight:900;line-height:1.1"></div>
+            <div id="ex-label" class="label-sm" style="margin-bottom:4px"></div>
+            <div id="ex-name" style="font-size:20px;font-weight:900;line-height:1.1;color:var(--txt)"></div>
+            <div id="ex-prev" style="font-size:11px;color:var(--grn);margin-top:3px"></div>
           </div>
           <div style="text-align:right;flex-shrink:0">
-            <div style="font-size:10px;color:#556">Target</div>
-            <div id="ex-target" style="font-size:14px;font-weight:800;color:#22c55e;margin-top:2px"></div>
+            <div style="font-size:10px;color:var(--txt4)">Target</div>
+            <div id="ex-target" style="font-size:14px;font-weight:800;color:var(--grn);margin-top:2px"></div>
           </div>
         </div>
-        <div id="ex-note" style="display:none;background:#0a1020;border:1px solid #1a2030;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#667;line-height:1.5"></div>
-        <div id="ai-box" style="display:none;background:#0a2010;border:1px solid #1a4030;border-radius:8px;padding:10px 12px;margin-bottom:12px;justify-content:space-between;align-items:center">
-          <span style="font-size:12px;color:#4a8">AI Load Suggestion</span>
-          <span id="ai-val" style="font-size:14px;font-weight:900;color:#22c55e"></span>
+        <div id="ex-note" style="display:none;background:var(--bg1);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--txt4);line-height:1.5"></div>
+        <div id="ai-box" style="display:none;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:10px 12px;margin-bottom:12px;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:var(--grn)">AI Load Suggestion</span>
+          <span id="ai-val" style="font-size:14px;font-weight:900;color:var(--grn)"></span>
         </div>
-        <div id="inputs-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div id="inputs-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
           <div>
-            <div style="font-size:10px;color:#556;margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Weight (lbs)</div>
-            <input id="inp-weight" type="number" inputmode="decimal" style="width:100%;background:#111827;border:1px solid #1e2d4a;border-radius:10px;padding:14px 0;text-align:center;font-size:26px;font-weight:900;color:#fff;outline:none"/>
+            <div style="font-size:10px;color:var(--txt4);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Weight (lbs)</div>
+            <input id="inp-weight" type="number" inputmode="decimal" style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:14px 0;text-align:center;font-size:26px;font-weight:900;color:var(--txt);outline:none"/>
           </div>
           <div>
-            <div style="font-size:10px;color:#556;margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Reps</div>
-            <input id="inp-reps" type="number" inputmode="decimal" style="width:100%;background:#111827;border:1px solid #1e2d4a;border-radius:10px;padding:14px 0;text-align:center;font-size:26px;font-weight:900;color:#fff;outline:none"/>
+            <div style="font-size:10px;color:var(--txt4);margin-bottom:6px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Reps</div>
+            <input id="inp-reps" type="number" inputmode="decimal" style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:14px 0;text-align:center;font-size:26px;font-weight:900;color:var(--txt);outline:none"/>
           </div>
         </div>
-        <div id="bw-info" style="display:none;background:#0a0e1a;border-radius:10px;padding:16px;text-align:center;color:#556;font-size:13px"></div>
+        <div id="bw-info" style="display:none;background:var(--bg3);border-radius:10px;padding:14px;text-align:center;color:var(--txt4);font-size:13px;margin-bottom:10px"></div>
+        <div>
+          <div style="font-size:10px;color:var(--txt5);margin-bottom:5px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Notes (optional)</div>
+          <textarea id="inp-notes" rows="2" placeholder="e.g. felt easy, shoulder tight..." style="width:100%;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;font-size:13px;color:var(--txt);outline:none;line-height:1.4"></textarea>
+        </div>
       </div>
-      <button id="log-btn" onclick="logSet()" style="width:100%;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:14px;padding:18px;font-weight:900;font-size:17px;letter-spacing:.5px;box-shadow:0 6px 20px rgba(37,99,235,.4);margin-bottom:16px;text-transform:uppercase">Log Set</button>
+      <button id="log-btn" onclick="logSet()" style="width:100%;background:linear-gradient(135deg,var(--acc2),var(--acc3));color:#fff;border:none;border-radius:14px;padding:17px;font-weight:900;font-size:17px;letter-spacing:.5px;box-shadow:0 6px 20px rgba(37,99,235,.35);margin-bottom:14px;text-transform:uppercase">Log Set</button>
       <div id="ex-list" style="display:flex;flex-direction:column;gap:4px"></div>
     </div>
   </div>
@@ -206,157 +267,458 @@ button{cursor:pointer;font-family:inherit}
 
 <!-- COMPLETE -->
 <div id="screen-complete" class="screen">
-  <div style="background:linear-gradient(135deg,#052010,#0a1a08);padding:32px 20px 24px;text-align:center;border-bottom:1px solid #1a3020">
-    <div style="font-size:11px;font-weight:700;letter-spacing:3px;color:#22c55e;text-transform:uppercase;margin-bottom:8px">Complete</div>
-    <div id="c-title" style="font-size:28px;font-weight:900"></div>
-    <div id="c-sets" style="font-size:13px;color:#4a8;margin-top:6px"></div>
+  <div style="background:var(--hdr2);padding:28px 20px 20px;text-align:center;border-bottom:1px solid var(--bdr)">
+    <div class="label-sm" style="color:var(--grn);margin-bottom:8px">Complete</div>
+    <div id="c-title" style="font-size:26px;font-weight:900;color:var(--txt)"></div>
+    <div id="c-sets" style="font-size:13px;color:var(--grn);margin-top:6px"></div>
   </div>
-  <div style="padding:16px;padding-bottom:40px">
-    <div id="load-box" style="display:none;background:#071d0f;border:1px solid #1a4025;border-radius:14px;padding:16px;margin-bottom:14px">
-      <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#22c55e;text-transform:uppercase;margin-bottom:12px">Next Session — Load Plan</div>
+  <div style="padding:14px;padding-bottom:40px;display:flex;flex-direction:column;gap:12px">
+    <div id="pr-box" style="display:none"></div>
+    <div id="load-box" style="display:none;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:14px;padding:16px">
+      <div class="label-sm" style="color:var(--grn);margin-bottom:12px">Next Session &#8212; Load Plan</div>
       <div id="load-list"></div>
     </div>
-    <div style="background:#070d1f;border:1px solid #1a2540;border-radius:14px;padding:16px;margin-bottom:14px">
-      <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#3b82f6;text-transform:uppercase;margin-bottom:12px">AI Coach</div>
-      <div id="ai-loading" style="display:flex;gap:8px;align-items:center;color:#445;font-size:13px"><span class="pulse-dot"></span>&nbsp;Analyzing your session...</div>
-      <div id="ai-text" style="display:none;font-size:13px;color:#aab;line-height:1.7;white-space:pre-wrap"></div>
+    <div class="card">
+      <div class="label-sm" style="margin-bottom:12px">AI Coach</div>
+      <div id="ai-loading" style="display:flex;gap:8px;align-items:center;color:var(--txt4);font-size:13px"><span class="pulse-dot"></span>&nbsp;Analyzing your session...</div>
+      <div id="ai-text" style="display:none;font-size:13px;color:var(--txt2);line-height:1.75;white-space:pre-wrap"></div>
     </div>
-    <div style="background:#0d1020;border:1px solid #1a2030;border-radius:14px;padding:16px;margin-bottom:20px">
-      <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#556;text-transform:uppercase;margin-bottom:10px">Session Log</div>
+    <div class="card">
+      <div class="label-sm" style="margin-bottom:10px">Session Log</div>
       <div id="slog"></div>
     </div>
-    <button onclick="nav('home')" style="width:100%;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:14px;padding:18px;font-weight:900;font-size:16px;text-transform:uppercase;letter-spacing:1px;box-shadow:0 6px 20px rgba(37,99,235,.4)">Back to Home</button>
+    <div id="weekly-review-btn-box" style="display:none">
+      <button onclick="showWeeklyReview()" style="width:100%;background:linear-gradient(135deg,var(--grn2),var(--grn3));color:#fff;border:none;border-radius:14px;padding:17px;font-weight:900;font-size:15px;box-shadow:0 6px 20px rgba(22,163,74,.35)">&#127942; View Weekly Review</button>
+    </div>
+    <button onclick="goHome()" class="btn-primary">Back to Home</button>
   </div>
 </div>
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────────────────────
-const WKS = [
-  { id:0, name:"Upper Body", full:"Day 1 \u2014 Upper Body", day:"THU", rest:75, circuit:false,
-    warmup:["5 min light cardio or bike","Arm circles \u2014 10 forward, 10 backward","Shoulder rolls x10","Band pull-aparts 2x15","1 warm-up set per major exercise at 50% weight"],
-    ex:[{n:"Machine Pulldown",s:3,r:10,w:95},{n:"Machine Row",s:3,r:10,w:97},{n:"Machine Chest Press",s:3,r:10,w:87},{n:"Machine Shoulder Press",s:3,r:12,w:47},{n:"Machine Pec Fly",s:3,r:12,w:60},{n:"Machine Bicep Curl",s:3,r:12,w:60},{n:"Machine Tricep Ext.",s:3,r:12,w:65}]},
-  { id:1, name:"Cardio + Core", full:"Day 2 \u2014 Cardio + Core", day:"FRI", rest:45, circuit:false,
-    warmup:["5 min easy walk to warm up"],
-    ex:[{n:"HIIT Treadmill",s:1,r:1,w:0,cardio:true,note:"25 min: 2min walk \u2192 10x(40sec run + 20sec walk) \u2192 3min cooldown"},{n:"Machine Ab Crunch",s:3,r:15,w:0},{n:"Hanging Knee Raises",s:3,r:15,w:0,bw:true},{n:"Plank",s:3,r:45,w:0,bw:true,unit:"sec"},{n:"Dead Bug",s:3,r:10,w:0,bw:true,unit:"each side"}]},
-  { id:2, name:"Lower Body", full:"Day 3 \u2014 Lower Body", day:"SAT", rest:90, circuit:false,
-    warmup:["5 min treadmill walk at incline","Hip circles \u2014 10 each leg each direction","Bodyweight squats 2x10 (slow, full range)","Glute bridges 2x15 (activates glutes)","1 warm-up set of Smith Squat at 40\u201350 lbs"],
-    ex:[{n:"Smith Machine Squat",s:3,r:10,w:90},{n:"Machine Leg Press",s:3,r:12,w:155},{n:"Smith Machine Hip Thrust",s:3,r:12,w:95},{n:"Machine Leg Curl",s:3,r:12,w:95},{n:"Machine Leg Extension",s:3,r:15,w:80},{n:"DB Romanian Deadlift",s:3,r:12,w:35},{n:"Machine Calf Extension",s:3,r:20,w:130}]},
-  { id:3, name:"Cardio", full:"Day 4 \u2014 Cardio", day:"SUN", rest:60, circuit:false,
-    warmup:["5 min easy walk"],
-    ex:[{n:"PF 30-Min Circuit",s:1,r:1,w:0,cardio:true,note:"Steady pace \u2014 you should be able to hold a conversation"},{n:"Incline Treadmill Walk",s:1,r:1,w:0,cardio:true,note:"Optional \u2014 10 min extra. Incline 8\u201312%, moderate pace."}]},
-  { id:4, name:"Full Body Circuit", full:"Day 5 \u2014 Full Body Circuit", day:"MON", rest:52, circuit:true,
-    warmup:["3\u20135 min light treadmill walk or stationary bike","Arm circles \u2014 10 forward, 10 backward","Hip circles \u2014 10 each leg","10 bodyweight squats (slow and controlled)","10 shoulder rolls"],
-    ex:[{n:"Machine Chest Press",s:3,r:12,w:80},{n:"Machine Pulldown",s:3,r:12,w:90},{n:"Machine Leg Press",s:3,r:15,w:130},{n:"Machine Row",s:3,r:12,w:105},{n:"DB Lateral Raise",s:3,r:15,w:15},{n:"Machine Ab Crunch",s:3,r:15,w:110},{n:"Machine Hip Abduction",s:3,r:15,w:160},{n:"Machine Hip Adduction",s:3,r:15,w:100}]},
+var WKS=[
+  {id:0,name:"Upper Body",full:"Day 1 \u2014 Upper Body",day:"THU",rest:75,circuit:false,
+   warmup:["5 min light cardio or bike","Arm circles \u2014 10 forward, 10 backward","Shoulder rolls x10","Band pull-aparts 2x15","1 warm-up set per major exercise at 50% weight"],
+   ex:[{n:"Machine Pulldown",s:3,r:10,w:95},{n:"Machine Row",s:3,r:10,w:97},{n:"Machine Chest Press",s:3,r:10,w:87},{n:"Machine Shoulder Press",s:3,r:12,w:47},{n:"Machine Pec Fly",s:3,r:12,w:60},{n:"Machine Bicep Curl",s:3,r:12,w:60},{n:"Machine Tricep Ext.",s:3,r:12,w:65}]},
+  {id:1,name:"Cardio + Core",full:"Day 2 \u2014 Cardio + Core",day:"FRI",rest:45,circuit:false,
+   warmup:["5 min easy walk to warm up"],
+   ex:[{n:"HIIT Treadmill",s:1,r:1,w:0,cardio:true,note:"25 min: 2min walk \u2192 10x(40sec run + 20sec walk) \u2192 3min cooldown"},{n:"Machine Ab Crunch",s:3,r:15,w:0},{n:"Hanging Knee Raises",s:3,r:15,w:0,bw:true},{n:"Plank",s:3,r:45,w:0,bw:true,unit:"sec"},{n:"Dead Bug",s:3,r:10,w:0,bw:true,unit:"each side"}]},
+  {id:2,name:"Lower Body",full:"Day 3 \u2014 Lower Body",day:"SAT",rest:90,circuit:false,
+   warmup:["5 min treadmill walk at incline","Hip circles \u2014 10 each leg each direction","Bodyweight squats 2x10 (slow, full range)","Glute bridges 2x15 (activates glutes)","1 warm-up set of Smith Squat at 40\u201350 lbs"],
+   ex:[{n:"Smith Machine Squat",s:3,r:10,w:90},{n:"Machine Leg Press",s:3,r:12,w:155},{n:"Smith Machine Hip Thrust",s:3,r:12,w:95},{n:"Machine Leg Curl",s:3,r:12,w:95},{n:"Machine Leg Extension",s:3,r:15,w:80},{n:"DB Romanian Deadlift",s:3,r:12,w:35},{n:"Machine Calf Extension",s:3,r:20,w:130}]},
+  {id:3,name:"Cardio",full:"Day 4 \u2014 Cardio",day:"SUN",rest:60,circuit:false,
+   warmup:["5 min easy walk"],
+   ex:[{n:"PF 30-Min Circuit",s:1,r:1,w:0,cardio:true,note:"Steady pace \u2014 you should be able to hold a conversation"},{n:"Incline Treadmill Walk",s:1,r:1,w:0,cardio:true,note:"Optional \u2014 10 min extra. Incline 8\u201312%, moderate pace."}]},
+  {id:4,name:"Full Body Circuit",full:"Day 5 \u2014 Full Body Circuit",day:"MON",rest:52,circuit:true,
+   warmup:["3\u20135 min light treadmill walk or stationary bike","Arm circles \u2014 10 forward, 10 backward","Hip circles \u2014 10 each leg","10 bodyweight squats (slow and controlled)","10 shoulder rolls"],
+   ex:[{n:"Machine Chest Press",s:3,r:12,w:80},{n:"Machine Pulldown",s:3,r:12,w:90},{n:"Machine Leg Press",s:3,r:15,w:130},{n:"Machine Row",s:3,r:12,w:105},{n:"DB Lateral Raise",s:3,r:15,w:15},{n:"Machine Ab Crunch",s:3,r:15,w:110},{n:"Machine Hip Abduction",s:3,r:15,w:160},{n:"Machine Hip Adduction",s:3,r:15,w:100}]},
 ];
-const WEEK=[{wId:4},{wId:null},{wId:null},{wId:0},{wId:1},{wId:2},{wId:3}];
-const DAYS=["MON","TUE","WED","THU","FRI","SAT","SUN"];
+var WEEK=[{wId:4},{wId:null},{wId:null},{wId:0},{wId:1},{wId:2},{wId:3}];
+var DAYS=["MON","TUE","WED","THU","FRI","SAT","SUN"];
 function isBW(e){return e.cardio||e.bw||e.w===0}
 
-// ── STORE ─────────────────────────────────────────────────────────────────────
-let hist=JSON.parse(localStorage.getItem("wh")||"[]");
-let sugg=JSON.parse(localStorage.getItem("sw")||"{}");
-function gsug(w,i){return sugg[w+"-"+i]}
-function persist(){localStorage.setItem("wh",JSON.stringify(hist));localStorage.setItem("sw",JSON.stringify(sugg))}
+// ── STORE ──────────────────────────────────────────────────────────────────────
+var hist,sugg,prs,bwlog,cfg;
+function loadStore(){
+  hist=JSON.parse(localStorage.getItem("wh")||"[]");
+  sugg=JSON.parse(localStorage.getItem("sw")||"{}");
+  prs=JSON.parse(localStorage.getItem("prs")||"{}");
+  bwlog=JSON.parse(localStorage.getItem("bwlog")||"[]");
+  cfg=Object.assign({vibrate:true,sound:true,theme:"dark",soreness:false},JSON.parse(localStorage.getItem("cfg")||"{}"));
+}
+function persist(){
+  localStorage.setItem("wh",JSON.stringify(hist));
+  localStorage.setItem("sw",JSON.stringify(sugg));
+  localStorage.setItem("prs",JSON.stringify(prs));
+  localStorage.setItem("bwlog",JSON.stringify(bwlog));
+  localStorage.setItem("cfg",JSON.stringify(cfg));
+}
+function gsug(w,i){
+  var v=sugg[w+"-"+i];
+  if(v===undefined)return undefined;
+  return cfg.soreness?Math.round(v*0.9):v;
+}
 
-// ── ROUTING ───────────────────────────────────────────────────────────────────
+// ── AUDIO / HAPTICS ────────────────────────────────────────────────────────────
+function beep(){
+  if(!cfg.sound)return;
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.frequency.value=880;o.type="sine";
+    g.gain.setValueAtTime(0.3,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+0.4);
+  }catch(e){}
+}
+function vibrate(){
+  if(!cfg.vibrate)return;
+  try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
+}
+
+// ── THEME ──────────────────────────────────────────────────────────────────────
+function applyTheme(){
+  document.documentElement.classList.toggle("light",cfg.theme==="light");
+}
+
+// ── NAV ────────────────────────────────────────────────────────────────────────
 function nav(s){
-  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".screen").forEach(function(x){x.classList.remove("active")});
   document.getElementById("screen-"+s).classList.add("active");
   window.scrollTo(0,0);
   if(s==="home")renderHome();
-  if(s==="settings"){var k=localStorage.getItem("apiKey")||"";document.getElementById("settings-key").value=k;}
+  if(s==="settings"){
+    document.getElementById("settings-key").value=localStorage.getItem("apiKey")||"";
+    renderSettingsToggles();
+  }
+}
+function goHome(){
+  // check weekly before going home
+  if(checkWeekComplete()){
+    showWeeklyReview();
+  } else {
+    nav("home");
+  }
 }
 
-// ── SETUP ─────────────────────────────────────────────────────────────────────
+// ── SETUP ──────────────────────────────────────────────────────────────────────
 function togglePwd(id){var i=document.getElementById(id);i.type=i.type==="password"?"text":"password"}
 function saveSetupKey(){localStorage.setItem("apiKey",document.getElementById("setup-key").value.trim());nav("home")}
 function skipSetup(){localStorage.setItem("apiKey","");nav("home")}
-function saveSettingsKey(){localStorage.setItem("apiKey",document.getElementById("settings-key").value.trim());var b=document.getElementById("save-key-btn");b.textContent="Saved!";setTimeout(()=>b.textContent="Save Key",2000)}
-function clearData(){if(confirm("Clear all workout history and load suggestions?")){hist=[];sugg={};persist();alert("Cleared.")}}
+function saveSettingsKey(){
+  localStorage.setItem("apiKey",document.getElementById("settings-key").value.trim());
+  var b=document.getElementById("save-key-btn");b.textContent="Saved!";
+  setTimeout(function(){b.textContent="Save Key"},2000);
+}
+function clearData(){
+  if(confirm("Clear all workout history, weights and records?")){
+    hist=[];sugg={};prs={};bwlog=[];persist();alert("Cleared.");
+  }
+}
+
+// ── SETTINGS TOGGLES ──────────────────────────────────────────────────────────
+function renderSettingsToggles(){
+  var toggles=[
+    {key:"sound",label:"Rest Timer Sound",desc:"Beep when rest ends"},
+    {key:"vibrate",label:"Rest Timer Vibration",desc:"Vibrate when rest ends"},
+    {key:"theme",label:"Light Mode",desc:"Switch to light theme",isTheme:true},
+  ];
+  document.getElementById("settings-toggles").innerHTML=toggles.map(function(t,i){
+    var on=t.isTheme?(cfg.theme==="light"):cfg[t.key];
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;'+(i>0?"border-top:1px solid var(--bdr)":"")+'">'
+      +'<div><div style="font-size:14px;font-weight:700;color:var(--txt)">'+t.label+'</div><div style="font-size:12px;color:var(--txt4);margin-top:2px">'+t.desc+'</div></div>'
+      +'<button onclick="toggleSetting(\''+t.key+'\')" style="width:48px;height:26px;border-radius:13px;border:none;background:'+(on?"var(--acc2)":"var(--bg3)")+';position:relative;transition:background .2s;flex-shrink:0">'
+      +'<div style="position:absolute;top:3px;left:'+(on?"25px":"3px")+';width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s"></div>'
+      +'</button></div>';
+  }).join("");
+}
+function toggleSetting(key){
+  if(key==="theme"){cfg.theme=cfg.theme==="dark"?"light":"dark";applyTheme();}
+  else cfg[key]=!cfg[key];
+  persist();
+  renderSettingsToggles();
+}
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
 function switchTab(t){
-  var td=document.getElementById("tab-today-pane"),hd=document.getElementById("tab-history-pane");
-  var tb=document.getElementById("tb-today"),hb=document.getElementById("tb-history");
-  td.style.display=t==="today"?"block":"none";hd.style.display=t==="history"?"block":"none";
-  tb.style.color=t==="today"?"#4a9eff":"#445";tb.style.borderBottom=t==="today"?"2px solid #4a9eff":"2px solid transparent";
-  hb.style.color=t==="history"?"#4a9eff":"#445";hb.style.borderBottom=t==="history"?"2px solid #4a9eff":"2px solid transparent";
+  ["today","history","weight"].forEach(function(n){
+    document.getElementById("tab-"+n+"-pane").style.display=n===t?"block":"none";
+    var b=document.getElementById("tb-"+n);
+    b.style.color=n===t?"var(--acc)":"var(--txt4)";
+    b.style.borderBottom=n===t?"2px solid var(--acc)":"2px solid transparent";
+  });
   if(t==="history")renderHistory();
+  if(t==="weight")renderWeightLog();
 }
 
 // ── HOME ──────────────────────────────────────────────────────────────────────
 function renderHome(){
-  // week strip
+  renderWeekStrip();
+  renderCards();
+  renderStreak();
+  renderTodayBanner();
+  renderSorenessBtn();
+}
+
+function renderWeekStrip(){
   var strip=document.getElementById("week-strip");strip.innerHTML="";
   DAYS.forEach(function(d,i){
-    var info=WEEK[i],active=info.wId!==null,done=active&&hist.some(function(h){return h.wId===info.wId});
+    var info=WEEK[i],active=info.wId!==null;
+    var done=active&&hist.some(function(h){return h.wId===info.wId});
     var div=document.createElement("div");
-    div.style.cssText="background:"+(active?"#111827":"#0d0d14")+";border:1px solid "+(active?"#1e2d4a":"#151520")+";border-radius:8px;padding:8px 0;text-align:center;cursor:"+(active?"pointer":"default");
-    div.innerHTML='<div style="font-size:9px;color:#445;font-weight:700;letter-spacing:1px">'+d+'</div><div style="width:6px;height:6px;border-radius:50%;margin:6px auto 0;background:'+(done?"#22c55e":active?"#2d4a7a":"transparent")+'"></div>';
-    if(active)div.onclick=(function(id){return function(){startWkt(id)}})(info.wId);
+    div.style.cssText="background:"+(active?"var(--bg2)":"var(--bg1)")+";border:1px solid "+(active?"var(--bdr2)":"var(--bdr)")+";border-radius:8px;padding:8px 0;text-align:center;cursor:"+(active?"pointer":"default");
+    div.innerHTML='<div style="font-size:9px;color:var(--txt4);font-weight:700;letter-spacing:1px">'+d+'</div>'
+      +'<div style="width:6px;height:6px;border-radius:50%;margin:5px auto 0;background:'+(done?"var(--grn)":active?"var(--acc)":"transparent")+'"></div>';
+    if(active)div.onclick=(function(id){return function(){openBrief(id)}})(info.wId);
     strip.appendChild(div);
   });
-  // cards
+}
+
+function renderCards(){
   var cards=document.getElementById("workout-cards");cards.innerHTML="";
   WKS.forEach(function(w){
     var last=hist.find(function(h){return h.wId===w.id});
     var ts=w.ex.reduce(function(a,e){return a+e.s},0);
     var d=document.createElement("div");
-    d.style.cssText="background:#0f1525;border:1px solid #1a2540;border-radius:14px;padding:16px;position:relative;overflow:hidden";
-    d.innerHTML='<div style="position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,#3b82f6,#1d4ed8);border-radius:3px 0 0 3px"></div>'
+    d.className="card";d.style.position="relative";d.style.overflow="hidden";d.style.padding="14px";
+    d.innerHTML='<div style="position:absolute;top:0;left:0;width:3px;height:100%;background:var(--card-accent);border-radius:3px 0 0 3px"></div>'
       +'<div style="padding-left:8px;display:flex;justify-content:space-between;align-items:flex-start">'
-      +'<div style="flex:1;margin-right:10px"><div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#3b82f6;text-transform:uppercase;margin-bottom:3px">'+w.day+'</div>'
-      +'<div style="font-size:16px;font-weight:800;margin-bottom:4px">'+w.full+'</div>'
-      +'<div style="font-size:11px;color:#445">'+w.ex.length+' exercises &middot; '+ts+' total sets</div>'
-      +(last?'<div style="font-size:11px;color:#2a5;margin-top:2px">Last: '+fmtDate(last.date)+'</div>':"")+'</div>'
+      +'<div style="flex:1;margin-right:10px">'
+      +'<div class="label-sm" style="margin-bottom:3px">'+w.day+'</div>'
+      +'<div style="font-size:15px;font-weight:800;margin-bottom:3px;color:var(--txt)">'+w.full+'</div>'
+      +'<div style="font-size:11px;color:var(--txt4)">'+w.ex.length+' exercises &middot; '+ts+' sets</div>'
+      +(last?'<div style="font-size:11px;color:var(--grn);margin-top:2px">Last: '+fmtDate(last.date)+'</div>':"")+'</div>'
       +'<div style="display:flex;gap:8px;flex-shrink:0;align-items:center">'
-      +'<button onclick="openPreview('+w.id+')" style="background:#111827;border:1px solid #1e2d4a;color:#4a7fd4;border-radius:10px;padding:10px 13px;font-size:13px;display:flex;align-items:center">'
-      +'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>'
-      +'<button onclick="startWkt('+w.id+')" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-weight:800;font-size:13px;box-shadow:0 4px 15px rgba(37,99,235,.3)">START</button></div></div>';
+      +'<button onclick="openPreview('+w.id+')" class="btn-secondary" style="padding:9px 12px;border-radius:10px;display:flex;align-items:center">'
+      +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>'
+      +'<button onclick="openBrief('+w.id+')" style="background:linear-gradient(135deg,var(--acc2),var(--acc3));color:#fff;border:none;border-radius:10px;padding:9px 16px;font-weight:800;font-size:13px;box-shadow:0 3px 12px rgba(37,99,235,.3)">START</button>'
+      +'</div></div>';
     cards.appendChild(d);
   });
 }
 
+function renderStreak(){
+  var s=calcStreak();
+  var el=document.getElementById("streak-badge");
+  if(s>0){
+    el.style.display="flex";
+    el.innerHTML='<div class="pill-badge" style="background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);color:var(--yel)">&#128293; '+s+' week'+(s>1?"s":"")+' streak</div>';
+  } else el.style.display="none";
+}
+
+function renderTodayBanner(){
+  var dayIdx=(new Date().getDay()+6)%7;
+  var info=WEEK[dayIdx];
+  var banner=document.getElementById("today-banner");
+  if(info.wId===null){
+    banner.style.display="block";
+    banner.innerHTML='<div style="background:var(--bg2);border-bottom:1px solid var(--bdr);padding:10px 14px;display:flex;align-items:center;gap:10px"><div style="font-size:12px;color:var(--txt4)">&#128564; Today is a rest day. You\'ve earned it.</div></div>';
+  } else {
+    var w=WKS.find(function(x){return x.id===info.wId});
+    banner.style.display="block";
+    banner.innerHTML='<div style="background:rgba(37,99,235,.1);border-bottom:1px solid rgba(37,99,235,.2);padding:10px 14px;display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:10px;font-weight:700;letter-spacing:2px;color:var(--acc);text-transform:uppercase;margin-bottom:2px">Today</div>'
+      +'<div style="font-size:13px;font-weight:800;color:var(--txt)">'+w.full+'</div></div>'
+      +'<button onclick="openBrief('+w.id+')" style="background:linear-gradient(135deg,var(--acc2),var(--acc3));color:#fff;border:none;border-radius:9px;padding:8px 16px;font-weight:800;font-size:13px;box-shadow:0 3px 10px rgba(37,99,235,.35)">Go</button>'
+      +'</div>';
+  }
+}
+
+function renderSorenessBtn(){
+  var btn=document.getElementById("soreness-btn");
+  if(cfg.soreness){
+    btn.style.background="rgba(251,191,36,.15)";btn.style.borderColor="var(--yelbd)";btn.style.color="var(--yel)";
+    btn.innerHTML="&#128137; Soreness Mode ON";
+  } else {
+    btn.style.background="var(--bg3)";btn.style.borderColor="var(--bdr2)";btn.style.color="var(--txt4)";
+    btn.innerHTML="&#128137; Feeling Good";
+  }
+}
+
+function toggleSoreness(){
+  cfg.soreness=!cfg.soreness;persist();
+  renderSorenessBtn();
+}
+
+function calcStreak(){
+  var needed=new Set([0,1,2,3,4]);
+  var weeks={};
+  hist.forEach(function(s){
+    var k=getWeekKey(new Date(s.date));
+    if(!weeks[k])weeks[k]=new Set();
+    weeks[k].add(s.wId);
+  });
+  var keys=Object.keys(weeks).sort().reverse();
+  var streak=0;
+  for(var i=0;i<keys.length;i++){
+    var ws=weeks[keys[i]];
+    var ok=true;needed.forEach(function(id){if(!ws.has(id))ok=false});
+    if(ok)streak++;else break;
+  }
+  return streak;
+}
+
+function getWeekKey(d){
+  var j=new Date(d.getFullYear(),0,1);
+  return d.getFullYear()+"-"+String(Math.ceil((((d-j)/86400000)+j.getDay()+1)/7)).padStart(2,"0");
+}
+
 function renderHistory(){
   var el=document.getElementById("history-list");
-  if(!hist.length){el.innerHTML='<div style="text-align:center;color:#445;padding:60px 20px"><div style="font-size:32px;color:#1e2d4a;margin-bottom:12px">\u2014</div><div style="font-weight:700">No workouts logged yet</div><div style="font-size:13px;margin-top:6px">Start your first session!</div></div>';return}
+  if(!hist.length){el.innerHTML='<div style="text-align:center;color:var(--txt4);padding:60px 20px"><div style="font-size:32px;margin-bottom:12px">&#8212;</div><div style="font-weight:700">No workouts logged yet</div></div>';return}
   el.innerHTML=hist.map(function(s){
-    var names=[...new Set(s.log.map(function(l){return l.n}))].join(" \u00b7 ");
-    return '<div style="background:#0f1525;border:1px solid #1a2540;border-radius:12px;padding:14px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-weight:800;font-size:15px">'+s.wName+'</div><div style="font-size:11px;color:#3b82f6;font-weight:700">'+s.log.length+' sets</div></div><div style="font-size:11px;color:#556">'+fmtDate(s.date)+'</div><div style="font-size:11px;color:#445;margin-top:4px">'+names+'</div></div>';
+    var names=[...new Set(s.log.map(function(l){return l.n}))].join(" &middot; ");
+    return '<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><div style="font-weight:800;font-size:14px;color:var(--txt)">'+s.wName+'</div><div style="font-size:11px;color:var(--acc);font-weight:700">'+s.log.length+' sets</div></div>'
+      +'<div style="font-size:11px;color:var(--txt4)">'+fmtDate(s.date)+'</div>'
+      +'<div style="font-size:11px;color:var(--txt5);margin-top:4px">'+names+'</div></div>';
   }).join("");
 }
 
 function fmtDate(iso){return new Date(iso).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}
+
+// ── BODY WEIGHT LOG ───────────────────────────────────────────────────────────
+function logBodyWeight(){
+  var v=parseFloat(document.getElementById("bw-input").value);
+  if(!v||v<50||v>600){alert("Please enter a valid weight.");return}
+  bwlog.unshift({date:new Date().toISOString(),w:v});
+  if(bwlog.length>52)bwlog=bwlog.slice(0,52);
+  persist();
+  document.getElementById("bw-input").value="";
+  renderWeightLog();
+}
+
+function renderWeightLog(){
+  var list=document.getElementById("bw-log-list");
+  drawBWChart();
+  renderBWStats();
+  if(!bwlog.length){list.innerHTML='<div style="text-align:center;color:var(--txt4);padding:30px 0;font-size:13px">No weight entries yet.</div>';return}
+  list.innerHTML=bwlog.slice(0,15).map(function(e,i){
+    var prev=bwlog[i+1];
+    var diff=prev?Math.round((e.w-prev.w)*10)/10:null;
+    var diffHtml=diff!==null?'<div style="font-size:11px;font-weight:700;color:'+(diff<0?"var(--grn)":diff>0?"var(--red)":"var(--txt4)")+'">'+(diff>0?"+":"")+diff+' lbs</div>':"";
+    return '<div class="card" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">'
+      +'<div><div style="font-size:14px;font-weight:800;color:var(--txt)">'+e.w+' lbs</div><div style="font-size:11px;color:var(--txt4);margin-top:2px">'+fmtDate(e.date)+'</div></div>'
+      +diffHtml+'</div>';
+  }).join("");
+}
+
+function drawBWChart(){
+  var canvas=document.getElementById("bw-chart");
+  var ctx=canvas.getContext("2d");
+  var W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  if(!bwlog.length){
+    ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue("--txt4").trim()||"#556";
+    ctx.font="13px 'Segoe UI',sans-serif";ctx.textAlign="center";
+    ctx.fillText("Log your first weight to see the chart",W/2,H/2);return;
+  }
+  var pts=bwlog.slice(0,20).reverse();
+  var vals=pts.map(function(p){return p.w});
+  var mn=Math.min.apply(null,vals)-5,mx=Math.max.apply(null,vals)+5;
+  var pad=40,cW=W-pad*2,cH=H-pad*2;
+  // Grid
+  var isDark=cfg.theme!=="light";
+  ctx.strokeStyle=isDark?"rgba(255,255,255,.06)":"rgba(0,0,0,.06)";
+  ctx.lineWidth=1;
+  for(var g=0;g<=4;g++){
+    var y=pad+cH*(1-g/4);
+    ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(W-pad,y);ctx.stroke();
+    var lv=Math.round(mn+(mx-mn)*g/4);
+    ctx.fillStyle=isDark?"#445":"#888";ctx.font="10px 'Segoe UI',sans-serif";ctx.textAlign="right";
+    ctx.fillText(lv,pad-4,y+4);
+  }
+  // Line
+  ctx.beginPath();
+  pts.forEach(function(p,i){
+    var x=pad+cW*i/(pts.length-1||1);
+    var y=pad+cH*(1-(p.w-mn)/(mx-mn));
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle="#3b82f6";ctx.lineWidth=2.5;ctx.lineJoin="round";ctx.stroke();
+  // Fill gradient
+  ctx.beginPath();
+  pts.forEach(function(p,i){
+    var x=pad+cW*i/(pts.length-1||1);
+    var y=pad+cH*(1-(p.w-mn)/(mx-mn));
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.lineTo(W-pad,H-pad);ctx.lineTo(pad,H-pad);ctx.closePath();
+  var gr=ctx.createLinearGradient(0,pad,0,H-pad);
+  gr.addColorStop(0,"rgba(59,130,246,.3)");gr.addColorStop(1,"rgba(59,130,246,0)");
+  ctx.fillStyle=gr;ctx.fill();
+  // Dots
+  pts.forEach(function(p,i){
+    var x=pad+cW*i/(pts.length-1||1);
+    var y=pad+cH*(1-(p.w-mn)/(mx-mn));
+    ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle="#3b82f6";ctx.fill();
+    ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(x,y,2,0,Math.PI*2);ctx.fill();
+  });
+}
+
+function renderBWStats(){
+  var el=document.getElementById("bw-stats");
+  if(bwlog.length<2){el.innerHTML="";return}
+  var cur=bwlog[0].w,start=bwlog[bwlog.length-1].w;
+  var total=Math.round((cur-start)*10)/10;
+  var mn=Math.min.apply(null,bwlog.map(function(b){return b.w}));
+  var mx=Math.max.apply(null,bwlog.map(function(b){return b.w}));
+  el.innerHTML=[
+    {label:"Current",val:cur+" lbs",c:"var(--acc)"},
+    {label:"Change",val:(total>0?"+":"")+total+" lbs",c:total<=0?"var(--grn)":"var(--red)"},
+    {label:"Lowest",val:mn+" lbs",c:"var(--grn)"},
+  ].map(function(s){
+    return '<div style="flex:1;background:var(--bg3);border-radius:8px;padding:8px;text-align:center;min-width:0">'
+      +'<div style="font-size:10px;color:var(--txt4);margin-bottom:3px;text-transform:uppercase;letter-spacing:1px">'+s.label+'</div>'
+      +'<div style="font-size:14px;font-weight:900;color:'+s.c+'">'+s.val+'</div></div>';
+  }).join("");
+}
 
 // ── PREVIEW ───────────────────────────────────────────────────────────────────
 var prevId;
 function openPreview(id){
   prevId=id;var pw=WKS[id];var ts=pw.ex.reduce(function(a,e){return a+e.s},0);
   document.getElementById("preview-header").innerHTML=
-    '<div style="width:36px;height:4px;background:#2a3550;border-radius:2px;margin:0 auto 16px"></div>'
+    '<div class="modal-handle"></div>'
     +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
-    +'<div><div style="font-size:10px;font-weight:700;letter-spacing:2px;color:#3b82f6;text-transform:uppercase;margin-bottom:4px">'+pw.day+' \u00b7 Preview</div>'
-    +'<div style="font-size:20px;font-weight:900">'+pw.full+'</div>'
-    +'<div style="font-size:12px;color:#445;margin-top:3px">'+pw.ex.length+' exercises \u00b7 '+ts+' sets \u00b7 '+pw.rest+'s rest'+(pw.circuit?' \u00b7 Circuit':'')+'</div></div>'
-    +'<button onclick="closePreview()" style="background:#111827;border:1px solid #1e2d4a;color:#556;border-radius:8px;width:32px;height:32px;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0">\u00d7</button></div>';
-
-  var warm=pw.warmup.map(function(w){return '<div style="font-size:12px;color:#d4b86a;padding:3px 0">\u00b7 '+w+'</div>'}).join("");
-  var circ=pw.circuit?'<div style="background:#0a1628;border:1px solid #1e3a60;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#60a5fa;line-height:1.6">Circuit format \u2014 do 1 set of each exercise, repeat for 3 rounds total.</div>':"";
+    +'<div><div class="label-sm" style="margin-bottom:4px">'+pw.day+' &middot; Preview</div>'
+    +'<div style="font-size:19px;font-weight:900;color:var(--txt)">'+pw.full+'</div>'
+    +'<div style="font-size:12px;color:var(--txt4);margin-top:3px">'+pw.ex.length+' exercises &middot; '+ts+' sets &middot; '+pw.rest+'s rest'+(pw.circuit?" &middot; Circuit":"")+'</div></div>'
+    +'<button onclick="closePreview()" style="background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt4);border-radius:8px;width:32px;height:32px;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0">&times;</button></div>';
+  var warm=pw.warmup.map(function(w){return'<div style="font-size:12px;color:var(--yel);padding:3px 0">&bull; '+w+'</div>'}).join("");
+  var circ=pw.circuit?'<div style="background:var(--bg5);border:1px solid #1e3a60;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#60a5fa;line-height:1.6">Circuit format &mdash; 1 set of each exercise, 3 rounds total.</div>':"";
   var exs=pw.ex.map(function(e,i){
     var s=gsug(id,i),bw=isBW(e);
-    var wt=!bw?('<div style="font-size:15px;font-weight:900;color:'+(s!==undefined?"#22c55e":"#4a7fd4")+'">'+(s!==undefined?s:e.w)+' lbs</div>'+(s!==undefined?'<div style="font-size:10px;color:#2a6;margin-top:2px">AI suggested</div>':"")):(!e.cardio?'<div style="font-size:12px;color:#445;font-weight:700">BW</div>':"");
-    return '<div style="background:#0f1525;border:1px solid #1a2540;border-radius:11px;padding:12px 14px;margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1;margin-right:10px"><div style="font-size:14px;font-weight:700;color:#d4e2ff;margin-bottom:3px">'+e.n+'</div><div style="font-size:11px;color:#445">'+(e.cardio?"Cardio":e.s+" sets \u00d7 "+e.r+(e.unit?" "+e.unit:" reps"))+'</div>'+(e.note?'<div style="font-size:11px;color:#556;margin-top:5px;line-height:1.5">'+e.note+'</div>':"")+' </div><div style="text-align:right;flex-shrink:0">'+wt+'</div></div></div>';
+    var wt=!bw?('<div style="font-size:15px;font-weight:900;color:'+(s!==undefined?"var(--grn)":"var(--acc)")+'">'+(s!==undefined?s:e.w)+' lbs</div>'+(s!==undefined?'<div style="font-size:10px;color:var(--grn2);margin-top:2px">AI suggested</div>':"")):(!e.cardio?'<div style="font-size:12px;color:var(--txt4);font-weight:700">BW</div>':"");
+    return '<div class="card" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:flex-start">'
+      +'<div style="flex:1;margin-right:10px"><div style="font-size:14px;font-weight:700;color:var(--txt);margin-bottom:3px">'+e.n+'</div>'
+      +'<div style="font-size:11px;color:var(--txt4)">'+(e.cardio?"Cardio":e.s+" sets &times; "+e.r+(e.unit?" "+e.unit:" reps"))+'</div>'
+      +(e.note?'<div style="font-size:11px;color:var(--txt5);margin-top:5px;line-height:1.5">'+e.note+'</div>':"")+' </div>'
+      +'<div style="text-align:right;flex-shrink:0">'+wt+'</div></div></div>';
   }).join("");
-
   document.getElementById("preview-body").innerHTML=
-    '<div style="background:#1a1500;border:1px solid #3d2e00;border-radius:12px;padding:14px;margin-bottom:16px">'
-    +'<div style="font-size:10px;font-weight:800;letter-spacing:2px;color:#fbbf24;text-transform:uppercase;margin-bottom:10px">Warm-Up</div>'+warm+'</div>'
-    +circ+'<div style="font-size:10px;font-weight:800;letter-spacing:2px;color:#556;text-transform:uppercase;margin-bottom:10px">Exercises</div>'+exs;
-
+    '<div style="background:var(--yelbg);border:1px solid var(--yelbd);border-radius:12px;padding:14px;margin-bottom:14px">'
+    +'<div class="label-sm" style="color:var(--yel);margin-bottom:10px">Warm-Up</div>'+warm+'</div>'
+    +circ+'<div class="label-sm" style="margin-bottom:10px">Exercises</div>'+exs;
   document.getElementById("preview-modal").style.display="flex";
 }
 function closePreview(){document.getElementById("preview-modal").style.display="none"}
-function startFromPreview(){closePreview();startWkt(prevId)}
+function startFromPreview(){closePreview();openBrief(prevId)}
+
+// ── PRE-WORKOUT BRIEF ─────────────────────────────────────────────────────────
+var pendingWktId;
+function openBrief(id){
+  pendingWktId=id;
+  var ak=localStorage.getItem("apiKey");
+  if(!ak){startWkt(id);return}
+  var w=WKS[id];
+  document.getElementById("brief-wkt-name").textContent=w.full;
+  document.getElementById("brief-loading").style.display="flex";
+  document.getElementById("brief-text").style.display="none";
+  document.getElementById("brief-modal").style.display="flex";
+  fetchBrief(id,ak);
+}
+async function fetchBrief(id,ak){
+  var w=WKS[id];
+  var last=hist.find(function(h){return h.wId===id});
+  var lastStr=last?"Last session ("+fmtDate(last.date)+"): "+last.log.slice(0,5).map(function(l){return l.n+(l.w>0?" @ "+l.w+"lbs":"")}).join(", "):"No previous session logged.";
+  var suggStr=w.ex.map(function(e,i){var s=gsug(id,i);return s!==undefined?e.n+": "+s+"lbs":null}).filter(Boolean).join(", ");
+  try{
+    var res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":ak,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:350,messages:[{role:"user",content:"You are a personal trainer AI giving a 3-sentence pre-workout brief.\n\nClient: 40yo male, 235 lbs, intermediate. Soreness mode: "+(cfg.soreness?"YES - reduce intensity":"No")+".\n\nUpcoming: "+w.full+"\n"+lastStr+(suggStr?"\nAI load suggestions: "+suggStr:"")+"\n\nGive exactly 3 short sentences: (1) what to focus on today, (2) one key form tip for this workout, (3) a motivation line. No headers, no lists. Keep it punchy and specific."}]})});
+    var data=await res.json();
+    var txt=data.content&&data.content.find(function(b){return b.type==="text"});
+    document.getElementById("brief-text").textContent=txt?txt.text:"Let's get after it. Focus on form today. You've got this!";
+  }catch(e){
+    document.getElementById("brief-text").textContent="Focus on controlled form today. Hit your target weights and rest fully between sets. Let's go!";
+  }
+  document.getElementById("brief-loading").style.display="none";
+  document.getElementById("brief-text").style.display="block";
+}
+function skipBrief(){document.getElementById("brief-modal").style.display="none";startWkt(pendingWktId)}
+function closeBriefAndStart(){document.getElementById("brief-modal").style.display="none";startWkt(pendingWktId)}
 
 // ── WORKOUT STATE ─────────────────────────────────────────────────────────────
 var wId,exI,setI,rnd,wlog,CW,CE,rtimer,rsec;
@@ -364,12 +726,24 @@ var wId,exI,setI,rnd,wlog,CW,CE,rtimer,rsec;
 function startWkt(id){
   wId=id;exI=0;setI=0;rnd=0;wlog=[];CW=WKS[id];CE=CW.ex[0];
   document.getElementById("warmup-box").style.display="block";
-  document.getElementById("warmup-items").innerHTML=CW.warmup.map(function(w){return'<div style="font-size:12px;color:#d4b86a;padding:2px 0">\u00b7 '+w+'</div>'}).join("");
+  document.getElementById("warmup-items").innerHTML=CW.warmup.map(function(w){return'<div style="font-size:12px;color:var(--yel);padding:2px 0">&bull; '+w+'</div>'}).join("");
   document.getElementById("rest-box").style.display="none";
   document.getElementById("ex-box").style.display="block";
-  drawEx();nav("workout");
+  document.getElementById("soreness-banner").style.display=cfg.soreness?"block":"none";
+  drawEx();
+  nav("workout");
 }
 function dismissWarmup(){document.getElementById("warmup-box").style.display="none"}
+
+function getPrevWeight(exName){
+  for(var i=0;i<hist.length;i++){
+    if(hist[i].wId===wId){
+      var entry=hist[i].log.find(function(l){return l.n===exName&&l.w>0});
+      if(entry)return entry.w;
+    }
+  }
+  return null;
+}
 
 function drawEx(){
   CE=CW.ex[exI];
@@ -381,12 +755,20 @@ function drawEx(){
   document.getElementById("w-bar").style.width=pct+"%";
   document.getElementById("ex-label").textContent=CW.circuit?"Round "+(rnd+1)+" / 3":"Set "+(setI+1)+" / "+CE.s;
   document.getElementById("ex-name").textContent=CE.n;
-  document.getElementById("ex-target").textContent=(CE.w>0?CE.w+"lbs \u00d7 ":"")+CE.r+" "+(CE.unit||"reps");
+  document.getElementById("ex-target").textContent=(CE.w>0?CE.w+"lbs &times; ":"")+CE.r+" "+(CE.unit||"reps");
+  // Previous weight
+  var prev=getPrevWeight(CE.n);
+  var prevEl=document.getElementById("ex-prev");
+  if(prev&&!isBW(CE)){prevEl.textContent="Last time: "+prev+" lbs";prevEl.style.display="block"}
+  else prevEl.style.display="none";
+  // Note
   if(CE.note){document.getElementById("ex-note").style.display="block";document.getElementById("ex-note").textContent=CE.note}
   else document.getElementById("ex-note").style.display="none";
+  // AI suggestion
   var sg=gsug(wId,exI);
   if(sg!==undefined&&!isBW(CE)){document.getElementById("ai-box").style.display="flex";document.getElementById("ai-val").textContent=sg+" lbs"}
   else document.getElementById("ai-box").style.display="none";
+  // Inputs
   if(!isBW(CE)){
     document.getElementById("inputs-grid").style.display="grid";
     document.getElementById("bw-info").style.display="none";
@@ -397,17 +779,20 @@ function drawEx(){
     document.getElementById("bw-info").style.display="block";
     document.getElementById("bw-info").textContent=CE.cardio?"Complete the cardio, then tap done":CE.r+" "+(CE.unit||"reps")+" \u2014 bodyweight";
   }
+  document.getElementById("inp-notes").value="";
+  // Button
   var nxt=nextStep();
   var btn=document.getElementById("log-btn");
   btn.textContent=nxt===null?"Finish Workout":isBW(CE)?"Mark Done":"Log Set";
-  btn.style.background=nxt===null?"linear-gradient(135deg,#16a34a,#15803d)":"linear-gradient(135deg,#2563eb,#1d4ed8)";
-  btn.style.boxShadow=nxt===null?"0 6px 20px rgba(22,163,74,.4)":"0 6px 20px rgba(37,99,235,.4)";
+  btn.style.background=nxt===null?"linear-gradient(135deg,var(--grn2),var(--grn3))":"linear-gradient(135deg,var(--acc2),var(--acc3))";
+  btn.style.boxShadow=nxt===null?"0 6px 20px rgba(22,163,74,.35)":"0 6px 20px rgba(37,99,235,.35)";
+  // Exercise list
   document.getElementById("ex-list").innerHTML=CW.ex.map(function(e,i){
-    var done=wlog.some(function(l){return l.ei===i}),cur=i===exI,sg=gsug(wId,i);
-    return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;background:'+(cur?"#0f1d38":"transparent")+';border:1px solid '+(cur?"#1e3a6e":"transparent")+'">'
-      +'<div style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;background:'+(done?"#15803d":cur?"#2563eb":"#111827")+';color:'+(done||cur?"#fff":"#445")+'">'+(done?"\u2713":i+1)+'</div>'
-      +'<div style="flex:1;font-size:13px;color:'+(cur?"#93c5fd":done?"#445":"#889")+';font-weight:'+(cur?700:400)+'">'+e.n+'</div>'
-      +(sg!==undefined&&!isBW(e)?'<div style="font-size:11px;color:#22c55e;font-weight:700">'+sg+'lbs</div>':"")
+    var done=wlog.some(function(l){return l.ei===i}),cur=i===exI,sg2=gsug(wId,i);
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;background:'+(cur?"var(--bg5)":"transparent")+';border:1px solid '+(cur?"#1e3a6e":"transparent")+'">'
+      +'<div style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;background:'+(done?"var(--grn3)":cur?"var(--acc2)":"var(--bg3)")+';color:'+(done||cur?"#fff":"var(--txt4)")+'">'+(done?"&#10003;":i+1)+'</div>'
+      +'<div style="flex:1;font-size:13px;color:'+(cur?"#93c5fd":done?"var(--txt5)":"var(--txt3)")+';font-weight:'+(cur?700:400)+'">'+e.n+'</div>'
+      +(sg2!==undefined&&!isBW(e)?'<div style="font-size:11px;color:var(--grn);font-weight:700">'+sg2+'lbs</div>':"")
       +'</div>';
   }).join("");
 }
@@ -418,7 +803,7 @@ function nextStep(){
 }
 
 function logSet(){
-  var entry={n:CE.n,ei:exI,sn:CW.circuit?rnd:setI,w:isBW(CE)?0:(parseFloat(document.getElementById("inp-weight").value)||0),reps:parseInt(document.getElementById("inp-reps").value)||CE.r,tr:CE.r};
+  var entry={n:CE.n,ei:exI,sn:CW.circuit?rnd:setI,w:isBW(CE)?0:(parseFloat(document.getElementById("inp-weight").value)||0),reps:parseInt(document.getElementById("inp-reps").value)||CE.r,tr:CE.r,note:document.getElementById("inp-notes").value.trim()};
   wlog.push(entry);
   var nxt=nextStep();
   if(!nxt){finishWkt();return}
@@ -426,12 +811,17 @@ function logSet(){
   startRest(CW.rest);
 }
 
+// ── REST TIMER ────────────────────────────────────────────────────────────────
 function startRest(sec){
   rsec=sec;
   document.getElementById("rest-box").style.display="block";
   document.getElementById("ex-box").style.display="none";
   drawRest();
-  rtimer=setInterval(function(){rsec--;if(rsec<=0){clearInterval(rtimer);endRest()}else drawRest()},1000);
+  rtimer=setInterval(function(){
+    rsec--;
+    if(rsec<=0){clearInterval(rtimer);beep();vibrate();endRest()}
+    else drawRest();
+  },1000);
 }
 function drawRest(){
   var m=Math.floor(rsec/60),s=rsec%60;
@@ -442,55 +832,95 @@ function skipRest(){clearInterval(rtimer);endRest()}
 function endRest(){document.getElementById("rest-box").style.display="none";document.getElementById("ex-box").style.display="block";drawEx()}
 
 // ── FINISH ────────────────────────────────────────────────────────────────────
+var weeklyReviewReady=false;
 async function finishWkt(){
   nav("complete");
   document.getElementById("c-title").textContent=CW.full;
   document.getElementById("c-sets").textContent=wlog.length+" sets logged";
   document.getElementById("ai-loading").style.display="flex";
   document.getElementById("ai-text").style.display="none";
+  document.getElementById("weekly-review-btn-box").style.display="none";
+  weeklyReviewReady=false;
 
-  var ns={};
+  // Progressive overload + PRs
+  var newSugg={...sugg},ns={},newPRs=[];
   CW.ex.forEach(function(e,i){
     if(e.w===0||e.cardio)return;
     var els=wlog.filter(function(l){return l.ei===i});if(!els.length)return;
+    var maxW=Math.max.apply(null,els.map(function(l){return l.w}));
     var avg=els.reduce(function(a,l){return a+l.w},0)/els.length;
     var ok=els.every(function(l){return l.reps>=l.tr});
     var nxt=ok?avg+5:avg;
-    sugg[wId+"-"+i]=nxt;ns[e.n]={cur:avg,nxt,up:ok};
+    newSugg[wId+"-"+i]=nxt;ns[e.n]={cur:avg,nxt,up:ok};
+    // PR check
+    if(!prs[e.n]||maxW>prs[e.n]){
+      if(prs[e.n])newPRs.push({name:e.n,weight:maxW,prev:prs[e.n]});
+      else if(maxW>0)newPRs.push({name:e.n,weight:maxW,prev:null});
+      prs[e.n]=maxW;
+    }
   });
-  hist=[{date:new Date().toISOString(),wId,wName:CW.name,log:wlog.map(function(l){return{n:l.n}})}, ...hist].slice(0,50);
+  sugg=newSugg;
+
+  // Save history
+  hist=[{date:new Date().toISOString(),wId,wName:CW.name,log:wlog.map(function(l){return{n:l.n,w:l.w,reps:l.reps,note:l.note}})},...hist].slice(0,100);
   persist();
 
+  // PR box
+  var prBox=document.getElementById("pr-box");
+  if(newPRs.length){
+    prBox.style.display="block";
+    prBox.innerHTML='<div class="card pop" style="background:rgba(251,191,36,.1);border-color:rgba(251,191,36,.3);margin-bottom:0">'
+      +'<div class="label-sm" style="color:var(--yel);margin-bottom:10px">&#127942; New Personal Record'+(newPRs.length>1?"s":"")+'!</div>'
+      +newPRs.map(function(p){
+        return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(251,191,36,.1)">'
+          +'<div style="font-size:13px;color:var(--txt)">'+p.name+'</div>'
+          +'<div style="font-size:14px;font-weight:900;color:var(--yel)">'+p.weight+'lbs '+(p.prev?'<span style="font-size:11px;color:var(--txt4);text-decoration:line-through;margin-left:4px">'+p.prev+'</span>':'&#9733;')+'</div>'
+          +'</div>';
+      }).join("")+'</div>';
+  } else prBox.style.display="none";
+
+  // Load plan
   var ents=Object.entries(ns);
   if(ents.length){
     document.getElementById("load-box").style.display="block";
     document.getElementById("load-list").innerHTML=ents.map(function(e){var nm=e[0],s=e[1];
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #0f3020">'
-        +'<div style="font-size:13px;color:#778;flex:1;margin-right:8px">'+nm+'</div>'
-        +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'
-        +'<span style="font-size:12px;color:#445;text-decoration:line-through">'+s.cur+'lbs</span>'
-        +'<span style="font-size:14px;font-weight:900;color:'+(s.up?"#22c55e":"#facc15")+'">'+s.nxt+'lbs '+(s.up?"+5":"=")+'</span></div></div>';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(34,197,94,.1)">'
+        +'<div style="font-size:13px;color:var(--txt3);flex:1;margin-right:8px">'+nm+'</div>'
+        +'<div style="display:flex;align-items:center;gap:8px;flex-shrink:0"><span style="font-size:12px;color:var(--txt4);text-decoration:line-through">'+s.cur+'lbs</span>'
+        +'<span style="font-size:14px;font-weight:900;color:'+(s.up?"var(--grn)":"var(--yel)")+'">'+s.nxt+'lbs '+(s.up?"+5":"=")+'</span></div></div>';
     }).join("");
   } else document.getElementById("load-box").style.display="none";
 
+  // Session log
   document.getElementById("slog").innerHTML=wlog.map(function(l){
-    return '<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #111827">'
-      +'<span style="color:#556">'+l.n+' \u2014 set '+(l.sn+1)+'</span>'
-      +'<span style="color:#fff;font-weight:700">'+(l.w>0?l.w+"lbs \u00d7 ":"")+l.reps+'</span></div>';
+    return '<div style="padding:5px 0;border-bottom:1px solid var(--bdr)">'
+      +'<div style="display:flex;justify-content:space-between;font-size:12px">'
+      +'<span style="color:var(--txt4)">'+l.n+' &mdash; set '+(l.sn+1)+'</span>'
+      +'<span style="color:var(--txt);font-weight:700">'+(l.w>0?l.w+"lbs &times; ":"")+l.reps+'</span></div>'
+      +(l.note?'<div style="font-size:11px;color:var(--txt5);margin-top:2px;font-style:italic">'+l.note+'</div>':"")
+      +'</div>';
   }).join("");
 
+  // Weekly check
+  if(checkWeekComplete()){
+    weeklyReviewReady=true;
+    document.getElementById("weekly-review-btn-box").style.display="block";
+  }
+
+  // AI insights
   var ak=localStorage.getItem("apiKey");
   if(ak){
     try{
-      var ls=wlog.map(function(l){return l.n+": "+(l.w>0?l.w+"lbs x ":"")+l.reps+" "+(l.tr<=1?"completed":"reps")}).join("\n");
-      var ss=Object.entries(ns).map(function(e){var nm=e[0],s=e[1];return nm+": "+s.cur+"lbs \u2192 "+s.nxt+"lbs"+(s.up?" (+5, all reps hit!)":" (same, missed reps)")}).join("\n");
+      var ls=wlog.map(function(l){return l.n+": "+(l.w>0?l.w+"lbs x ":"")+l.reps+" "+(l.tr<=1?"completed":"reps")+(l.note?" ["+l.note+"]":"")}).join("\n");
+      var ss=Object.entries(ns).map(function(e){var nm=e[0],s=e[1];return nm+": "+s.cur+"lbs \u2192 "+s.nxt+"lbs"+(s.up?" (+5, hit all reps!)":" (same, missed reps)")}).join("\n");
+      var prStr=newPRs.length?"New PRs: "+newPRs.map(function(p){return p.name+" "+p.weight+"lbs"}).join(", "):"";
       var res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
         headers:{"Content-Type":"application/json","x-api-key":ak,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:"You are a direct, no-fluff personal trainer AI.\n\nClient: 40yo male, 235 lbs, intermediate, goal: build muscle + burn fat\n\nCompleted: "+CW.full+"\n\nSets:\n"+ls+"\n\nProgressive overload:\n"+(ss||"Cardio/bodyweight session")+"\n\nReply with these ** headers:\n\n**Performance**\n2-3 sentences on how the session went.\n\n**Nailed It**\nOne specific thing done well.\n\n**Next Time**\nOne thing to improve.\n\n**Weight Plan**\nNext session weights.\n\n**Keep Going**\nOne punchy motivating line.\n\nBe direct. Use actual numbers."}]})});
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:"You are a direct personal trainer AI. Analyze this workout.\n\nClient: 40yo male, 235 lbs, intermediate, goal: build muscle + burn fat. Soreness mode: "+(cfg.soreness?"YES (weights reduced 10%)":"No")+".\n\nCompleted: "+CW.full+"\n\nSets:\n"+ls+"\n\nProgressive overload:\n"+(ss||"Cardio/bodyweight session")+(prStr?"\n\n"+prStr:"")+"\n\nReply with these ** headers only:\n\n**Performance**\n2-3 sentences on how it went.\n\n**Nailed It**\nOne specific thing done well.\n\n**Next Time**\nOne thing to improve.\n\n**Weight Plan**\nNext session weights.\n\n**Keep Going**\nOne punchy motivating line.\n\nBe direct. Use actual numbers."}]})});
       var data=await res.json();
-      document.getElementById("ai-text").textContent=(data.content&&data.content.find(function(b){return b.type==="text"}))||"Great session!";
-      if(data.content){var tb=data.content.find(function(b){return b.type==="text"});document.getElementById("ai-text").textContent=tb?tb.text:"Great session!";}
-    }catch(e){document.getElementById("ai-text").textContent="Great session! Check your load suggestions for next time."}
+      var tb=data.content&&data.content.find(function(b){return b.type==="text"});
+      document.getElementById("ai-text").textContent=tb?tb.text:"Great session! Check your load plan above.";
+    }catch(e){document.getElementById("ai-text").textContent="Great session! Check your load suggestions above for next time."}
   } else {
     document.getElementById("ai-text").textContent="Add an API key in Settings to unlock AI coaching after each workout.";
   }
@@ -498,11 +928,54 @@ async function finishWkt(){
   document.getElementById("ai-text").style.display="block";
 }
 
+// ── WEEKLY REVIEW ─────────────────────────────────────────────────────────────
+function checkWeekComplete(){
+  var weekKey=getWeekKey(new Date());
+  var thisWeek=hist.filter(function(s){return getWeekKey(new Date(s.date))===weekKey});
+  var ids=new Set(thisWeek.map(function(s){return s.wId}));
+  return ids.has(0)&&ids.has(1)&&ids.has(2)&&ids.has(3)&&ids.has(4);
+}
+
+async function showWeeklyReview(){
+  document.getElementById("weekly-loading").style.display="flex";
+  document.getElementById("weekly-text").style.display="none";
+  document.getElementById("weekly-modal").style.display="flex";
+  var ak=localStorage.getItem("apiKey");
+  if(!ak){
+    document.getElementById("weekly-text").textContent="Add an API key in Settings to unlock the weekly AI review.";
+    document.getElementById("weekly-loading").style.display="none";
+    document.getElementById("weekly-text").style.display="block";
+    return;
+  }
+  var weekKey=getWeekKey(new Date());
+  var thisWeek=hist.filter(function(s){return getWeekKey(new Date(s.date))===weekKey});
+  var summary=thisWeek.map(function(s){
+    var tops=s.log.filter(function(l){return l.w>0}).slice(0,4).map(function(l){return l.n+" "+l.w+"lbs"}).join(", ");
+    return s.wName+(tops?" ("+tops+")":"");
+  }).join("\n");
+  var bwRecent=bwlog[0]?"\nCurrent weight: "+bwlog[0].w+" lbs":"";
+  var streak=calcStreak();
+  try{
+    var res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":ak,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,messages:[{role:"user",content:"You are a personal trainer AI giving a weekly review.\n\nClient: 40yo male, 235 lbs, intermediate, goal: muscle + fat burn. Streak: "+streak+" week(s)."+bwRecent+"\n\nThis week's sessions:\n"+summary+"\n\nReply with these ** headers:\n\n**Week Summary**\n2-3 sentences on the overall week.\n\n**Biggest Win**\nOne highlight from the week.\n\n**Focus Next Week**\nTwo specific things to prioritize.\n\n**Trend**\nAny patterns you notice in the numbers.\n\n**Motivation**\nOne strong closing line for next week.\n\nBe specific to their actual numbers and sessions."}]})});
+    var data=await res.json();
+    var tb=data.content&&data.content.find(function(b){return b.type==="text"});
+    document.getElementById("weekly-text").textContent=tb?tb.text:"Great week! Keep the momentum going.";
+  }catch(e){document.getElementById("weekly-text").textContent="You completed the full week — that's a massive win. Keep the momentum going next week!"}
+  document.getElementById("weekly-loading").style.display="none";
+  document.getElementById("weekly-text").style.display="block";
+}
+function closeWeeklyModal(){
+  document.getElementById("weekly-modal").style.display="none";
+  nav("home");
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
-(function(){
-  var k=localStorage.getItem("apiKey");
-  if(k===null){nav("setup")}else{nav("home")}
-})();
+loadStore();
+applyTheme();
+var ak=localStorage.getItem("apiKey");
+if(ak===null){nav("setup")}else{nav("home")}
 </script>
 </body>
 </html>
