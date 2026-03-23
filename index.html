@@ -87,11 +87,12 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div id="screen-auth" class="screen">
   <div style="padding:40px 24px;min-height:100vh;display:flex;flex-direction:column;justify-content:center">
     <div style="font-size:32px;font-weight:900;margin-bottom:4px">FitForge</div>
-    <div style="font-size:13px;color:var(--txt4);margin-bottom:32px">Your AI-powered workout companion</div>
+    <div style="font-size:13px;color:var(--txt4);margin-bottom:32px">Sign in to access your plan on any device</div>
     <div style="display:flex;border-bottom:1px solid var(--bdr);margin-bottom:24px">
       <button id="auth-tab-in" onclick="switchAuthTab('in')" style="flex:1;padding:12px;border:none;background:transparent;font-weight:700;font-size:14px;color:var(--acc);border-bottom:2px solid var(--acc)">Sign In</button>
       <button id="auth-tab-up" onclick="switchAuthTab('up')" style="flex:1;padding:12px;border:none;background:transparent;font-weight:700;font-size:14px;color:var(--txt4);border-bottom:2px solid transparent">Sign Up</button>
     </div>
+    <div id="signup-note" style="display:none;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--acc);line-height:1.6">Create an account to access your workouts from any phone, tablet, or computer.</div>
     <div class="field-lbl">Email</div>
     <input id="auth-email" class="inp" style="margin-bottom:12px" type="email" placeholder="you@email.com" autocomplete="email"/>
     <div class="field-lbl">Password</div>
@@ -101,7 +102,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     </div>
     <div id="auth-err" style="font-size:12px;color:var(--red);min-height:18px;margin-bottom:16px"></div>
     <button id="auth-btn" onclick="doAuth()" class="btn-p">Sign In</button>
-    <button onclick="nav('config')" style="margin-top:20px;background:none;border:none;color:var(--txt5);font-size:12px;text-decoration:underline">Change Supabase connection</button>
+    <div style="text-align:center;margin-top:20px;font-size:12px;color:var(--txt5)">Use the same email &amp; password on any device to access your account.</div>
+    <button onclick="nav('config')" style="margin-top:12px;background:none;border:none;color:var(--txt5);font-size:12px;text-decoration:underline;display:block;width:100%;text-align:center">Change Supabase connection</button>
   </div>
 </div>
 
@@ -111,6 +113,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <div class="lbl" style="margin-bottom:8px">Welcome to FitForge</div>
     <div style="font-size:24px;font-weight:900;margin-bottom:6px">Tell us about you</div>
     <div style="font-size:13px;color:var(--txt4);margin-bottom:28px">This helps the AI coach personalize your experience.</div>
+    <div class="field-lbl">Username <span style="color:var(--txt5);font-weight:400;text-transform:none;letter-spacing:0">(shown in the app)</span></div>
+    <input id="ps-username" class="inp" style="margin-bottom:14px" placeholder="e.g. ironmike, fitjess" autocomplete="username"/>
     <div class="field-lbl">Your Name</div>
     <input id="ps-name" class="inp" style="margin-bottom:14px" placeholder="First name"/>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
@@ -628,8 +632,9 @@ function switchAuthTab(mode){
   document.getElementById('auth-tab-in').style.borderBottom=isin?'2px solid var(--acc)':'2px solid transparent';
   document.getElementById('auth-tab-up').style.color=!isin?'var(--acc)':'var(--txt4)';
   document.getElementById('auth-tab-up').style.borderBottom=!isin?'2px solid var(--acc)':'2px solid transparent';
-  document.getElementById('auth-btn').textContent=isin?'Sign In':'Sign Up';
+  document.getElementById('auth-btn').textContent=isin?'Sign In':'Create Account';
   document.getElementById('auth-err').textContent='';
+  document.getElementById('signup-note').style.display=isin?'none':'block';
 }
 async function doAuth(){
   var email=document.getElementById('auth-email').value.trim();
@@ -659,8 +664,9 @@ async function doSignOut(){
 // ── PROFILE ───────────────────────────────────────────────────────────────────
 async function saveProfile(){
   var name=document.getElementById('ps-name').value.trim();
+  var username=document.getElementById('ps-username').value.trim().toLowerCase().replace(/\s+/g,'_');
   if(!name){alert('Please enter your name.');return}
-  var data={id:S.uid,name,age:parseInt(document.getElementById('ps-age').value)||0,weight_lbs:parseFloat(document.getElementById('ps-weight').value)||0,goal:document.getElementById('ps-goal').value,anthropic_key:document.getElementById('ps-apikey').value.trim()};
+  var data={id:S.uid,name,username,age:parseInt(document.getElementById('ps-age').value)||0,weight_lbs:parseFloat(document.getElementById('ps-weight').value)||0,goal:document.getElementById('ps-goal').value,anthropic_key:document.getElementById('ps-apikey').value.trim()};
   await dbUpsert('profiles',data);
   S.profile=data;
   if(!S.workouts.length){nav('template');renderTemplates(false);}
@@ -668,6 +674,7 @@ async function saveProfile(){
 }
 function loadProfileIntoForm(){
   if(!S.profile)return;
+  document.getElementById('ps-username').value=S.profile.username||'';
   document.getElementById('ps-name').value=S.profile.name||'';
   document.getElementById('ps-age').value=S.profile.age||'';
   document.getElementById('ps-weight').value=S.profile.weight_lbs||'';
@@ -716,7 +723,7 @@ async function applyTemplate(idx){
 
 // ── HOME ──────────────────────────────────────────────────────────────────────
 function renderHome(){
-  var name=S.profile&&S.profile.name?S.profile.name.split(' ')[0]:'there';
+  var name=S.profile&&S.profile.username?S.profile.username:(S.profile&&S.profile.name?S.profile.name.split(' ')[0]:'there');
   document.getElementById('home-greeting').textContent='Hey, '+name+'!';
   renderWeekStrip();renderCards();renderStreak();renderTodayBanner();renderSorenessBtn();
 }
@@ -1249,7 +1256,7 @@ async function showWeeklyReview(){
 // ── SETTINGS ──────────────────────────────────────────────────────────────────
 function renderSettings(){
   var p=S.profile||{};
-  document.getElementById('settings-profile').innerHTML='<div style="font-size:15px;font-weight:800;margin-bottom:3px">'+(p.name||'—')+'</div><div style="font-size:12px;color:var(--txt4)">Age: '+(p.age||'—')+' &nbsp;&middot;&nbsp; Weight: '+(p.weight_lbs||'—')+' lbs &nbsp;&middot;&nbsp; Goal: '+(GOALS[p.goal]||p.goal||'—')+'</div>';
+  document.getElementById('settings-profile').innerHTML='<div style="font-size:15px;font-weight:800;margin-bottom:2px">'+(p.name||'—')+'</div>'+(p.username?'<div style="font-size:12px;color:var(--acc);margin-bottom:4px">@'+p.username+'</div>':'')+'<div style="font-size:12px;color:var(--txt4)">Age: '+(p.age||'—')+' &nbsp;&middot;&nbsp; Weight: '+(p.weight_lbs||'—')+' lbs &nbsp;&middot;&nbsp; Goal: '+(GOALS[p.goal]||p.goal||'—')+'</div>';
   document.getElementById('sb-url-display').textContent=SB_URL||'Not connected';
   renderPrefToggles();
 }
