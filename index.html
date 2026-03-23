@@ -66,23 +66,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </head>
 <body>
 
-<!-- ── SUPABASE CONFIG ─────────────────────────────────────────── -->
-<div id="screen-config" class="screen active">
-  <div style="padding:40px 24px;min-height:100vh;display:flex;flex-direction:column;justify-content:center">
-    <div style="font-size:28px;font-weight:900;margin-bottom:6px">FitForge</div>
-    <div style="font-size:14px;color:var(--txt4);margin-bottom:32px">Connect your Supabase project to get started.</div>
-    <div class="field-lbl">Supabase Project URL</div>
-    <input id="cfg-url" class="inp" style="margin-bottom:12px" type="url" placeholder="https://xxxx.supabase.co"/>
-    <div class="field-lbl">Anon / Public Key</div>
-    <div style="position:relative;margin-bottom:24px">
-      <input id="cfg-key" class="inp" type="password" placeholder="eyJhbGci..."/>
-      <button onclick="togglePwd('cfg-key')" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--txt4);font-size:15px">&#128065;</button>
-    </div>
-    <button onclick="saveConfig()" class="btn-p">Connect &amp; Continue</button>
-    <div style="font-size:12px;color:var(--txt5);margin-top:16px;text-align:center">Get these from <span style="color:var(--acc)">supabase.com</span> → Your Project → Settings → API</div>
-  </div>
-</div>
-
 <!-- ── AUTH ──────────────────────────────────────────────────── -->
 <div id="screen-auth" class="screen">
   <div style="padding:40px 24px;min-height:100vh;display:flex;flex-direction:column;justify-content:center">
@@ -102,8 +85,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     </div>
     <div id="auth-err" style="font-size:12px;color:var(--red);min-height:18px;margin-bottom:16px"></div>
     <button id="auth-btn" onclick="doAuth()" class="btn-p">Sign In</button>
-    <div style="text-align:center;margin-top:20px;font-size:12px;color:var(--txt5)">Use the same email &amp; password on any device to access your account.</div>
-    <button onclick="nav('config')" style="margin-top:12px;background:none;border:none;color:var(--txt5);font-size:12px;text-decoration:underline;display:block;width:100%;text-align:center">Change Supabase connection</button>
+    <button onclick="doSignOut()" style="margin-top:12px;background:none;border:none;color:var(--txt5);font-size:12px;text-decoration:underline;display:block;width:100%;text-align:center">Use a different account</button>
   </div>
 </div>
 
@@ -357,11 +339,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="lbl" style="margin-bottom:12px">Preferences</div>
       <div id="pref-toggles"></div>
     </div>
-    <div class="card">
-      <div class="lbl" style="margin-bottom:12px">Supabase</div>
-      <div style="font-size:12px;color:var(--txt4);margin-bottom:12px">Connected: <span id="sb-url-display" style="color:var(--grn)"></span></div>
-      <button onclick="nav('config')" style="width:100%;background:var(--bg3);border:1px solid var(--bdr2);color:var(--txt3);border-radius:10px;padding:12px;font-weight:700;font-size:13px">Reconnect / Change</button>
-    </div>
     <button onclick="doSignOut()" class="btn-r" style="color:var(--red)">Sign Out</button>
   </div>
 </div>
@@ -522,7 +499,8 @@ var S={
 };
 
 // ── SUPABASE ──────────────────────────────────────────────────────────────────
-var SB_URL='',SB_KEY='';
+var SB_URL='https://shsqmwrdeszfdichcmgm.supabase.co';
+var SB_KEY='sb_publishable_etp9W7AbUCpqDyj8eXmpOw_spA6E2Fy';
 function sbToken(){return (S.session&&S.session.access_token)||SB_KEY}
 function sbH(extra){return Object.assign({'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+sbToken()},extra||{})}
 
@@ -612,16 +590,6 @@ function showToast(msg,dur){
   t.textContent=msg;t.style.opacity='1';clearTimeout(t._t);t._t=setTimeout(function(){t.style.opacity='0'},dur||2000);
 }
 function togglePwd(id){var i=document.getElementById(id);i.type=i.type==='password'?'text':'password'}
-
-// ── CONFIG ────────────────────────────────────────────────────────────────────
-function saveConfig(){
-  var url=document.getElementById('cfg-url').value.trim().replace(/\/$/,'');
-  var key=document.getElementById('cfg-key').value.trim();
-  if(!url||!key){alert('Please enter both URL and key.');return}
-  localStorage.setItem('sbUrl',url);localStorage.setItem('sbKey',key);
-  SB_URL=url;SB_KEY=key;
-  nav('auth');
-}
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 var authMode='in';
@@ -1257,7 +1225,6 @@ async function showWeeklyReview(){
 function renderSettings(){
   var p=S.profile||{};
   document.getElementById('settings-profile').innerHTML='<div style="font-size:15px;font-weight:800;margin-bottom:2px">'+(p.name||'—')+'</div>'+(p.username?'<div style="font-size:12px;color:var(--acc);margin-bottom:4px">@'+p.username+'</div>':'')+'<div style="font-size:12px;color:var(--txt4)">Age: '+(p.age||'—')+' &nbsp;&middot;&nbsp; Weight: '+(p.weight_lbs||'—')+' lbs &nbsp;&middot;&nbsp; Goal: '+(GOALS[p.goal]||p.goal||'—')+'</div>';
-  document.getElementById('sb-url-display').textContent=SB_URL||'Not connected';
   renderPrefToggles();
 }
 var prefDefs=[{key:'sound',label:'Rest Timer Sound',desc:'Beep when rest ends'},{key:'vibrate',label:'Vibration',desc:'Vibrate when rest ends'},{key:'theme',label:'Light Mode',desc:'Switch to light theme',isTheme:true}];
@@ -1285,11 +1252,6 @@ async function init(){
   // Apply saved theme
   var theme=localStorage.getItem('theme')||'dark';
   document.documentElement.classList.toggle('light',theme==='light');
-
-  SB_URL=(localStorage.getItem('sbUrl')||'').replace(/\/$/,'');
-  SB_KEY=localStorage.getItem('sbKey')||'';
-
-  if(!SB_URL||!SB_KEY){nav('config');return}
 
   var ok=await sbRestoreSession();
   if(!ok){nav('auth');return}
