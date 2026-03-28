@@ -870,7 +870,7 @@ function renderHistory(){
     var log=Array.isArray(s.log)?s.log:[];
     var names=[...new Set(log.map(function(l){return l.n||''}))].filter(Boolean).join(' &middot; ');
     var totalSets=log.length;
-    var heaviest=log.filter(function(l){return l.w>0}).sort(function(a,b){return b.w-a.w})[0];
+    var heaviest=log.filter(function(l){return parseFloat(l.w)>0}).sort(function(a,b){return (parseFloat(b.w)||0)-(parseFloat(a.w)||0)})[0];
     return '<div class="card" style="margin-bottom:10px;cursor:pointer;active:opacity:.8" onclick="openHistoryDetail('+i+')">'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">'
       +'<div style="font-weight:800;font-size:14px">'+s.workout_name+'</div>'
@@ -909,9 +909,9 @@ function openHistoryDetail(idx){
   });
 
   // Stats row
-  var weights=log.filter(function(l){return l.w>0});
-  var totalVol=weights.reduce(function(a,l){return a+l.w*l.reps},0);
-  var heaviest=weights.sort(function(a,b){return b.w-a.w})[0];
+  var weights=log.filter(function(l){return parseFloat(l.w)>0});
+  var totalVol=weights.reduce(function(a,l){return a+(parseFloat(l.w)||0)*(parseInt(l.reps)||0)},0);
+  var heaviest=weights.slice().sort(function(a,b){return (parseFloat(b.w)||0)-(parseFloat(a.w)||0)})[0];
   var statsHtml='<div style="display:flex;gap:8px;margin-bottom:16px">'
     +[
       {l:'Sets',v:log.length},
@@ -932,15 +932,20 @@ function openHistoryDetail(idx){
       +'<div style="font-size:14px;font-weight:800;margin-bottom:8px">'+name+'</div>'
       +'<div style="display:flex;flex-direction:column;gap:4px">'
       +sets.map(function(l,i){
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bdr)">'
-          +'<div style="font-size:12px;color:var(--txt4)">Set '+(l.sn+1)+'</div>'
-          +'<div style="font-size:13px;font-weight:700;color:var(--txt)">'+(l.w>0?l.w+'lbs &times; '+l.reps+' reps':l.reps+' reps')+'</div>'
+        var setNum=(l.sn!==undefined&&l.sn!==null)?l.sn+1:i+1;
+        var weight=parseFloat(l.w)||0;
+        var reps=parseInt(l.reps)||0;
+        return '<div style="padding:6px 0;border-bottom:1px solid var(--bdr)">'
+          +'<div style="display:flex;justify-content:space-between;align-items:center">'
+          +'<div style="font-size:12px;color:var(--txt4)">Set '+setNum+'</div>'
+          +'<div style="font-size:13px;font-weight:700;color:var(--txt)">'+(weight>0?weight+'lbs &times; '+reps+' reps':reps>0?reps+' reps':'Completed')+'</div>'
+          +'</div>'
           +(l.note?'<div style="font-size:11px;color:var(--txt5);font-style:italic;margin-top:2px">'+escHtml(l.note)+'</div>':'')
           +'</div>';
       }).join('')
       +'</div>'
       // Max weight for this exercise
-      +(bw?'':('<div style="margin-top:8px;font-size:11px;color:var(--grn)">Max: '+Math.max.apply(null,sets.map(function(l){return l.w||0}))+'lbs &nbsp;&middot;&nbsp; Avg: '+Math.round(sets.reduce(function(a,l){return a+(l.w||0)},0)/sets.length)+'lbs</div>'))
+      +(bw?'':('<div style="margin-top:8px;font-size:11px;color:var(--grn)">Max: '+Math.max.apply(null,sets.map(function(l){return parseFloat(l.w)||0}))+'lbs &nbsp;&middot;&nbsp; Avg: '+Math.round(sets.reduce(function(a,l){return a+(parseFloat(l.w)||0)},0)/sets.length)+'lbs</div>'))
       +'</div>';
   }).join('');
 
