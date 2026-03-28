@@ -590,18 +590,40 @@ async function loadAll(){
     dbQ('profiles','id=eq.'+uid),
     dbQ('workouts','user_id=eq.'+uid+'&order=sort_order.asc,day_of_week.asc.nullslast'),
     dbQ('exercises','user_id=eq.'+uid+'&order=sort_order.asc'),
-    dbQ('workout_history','user_id=eq.'+uid+'&order=created_at.desc&limit=50'),
+    dbQ('workout_history','user_id=eq.'+uid+'&order=created_at.desc&limit=100'),
     dbQ('load_suggestions','user_id=eq.'+uid),
     dbQ('personal_records','user_id=eq.'+uid),
     dbQ('body_weight_log','user_id=eq.'+uid+'&order=created_at.desc&limit=52'),
   ]);
   S.profile=prof&&prof[0]||null;
   S.workouts=(wkts||[]).map(function(w){return Object.assign({},w,{exercises:(exs||[]).filter(function(e){return e.workout_id===w.id})})});
-  S.history=hist||[];
-  S.suggestions={};(sugg||[]).forEach(function(r){S.suggestions[r.exercise_id]=r.suggested_weight});
-  S.prs={};(prs||[]).forEach(function(r){S.prs[r.exercise_name]=r.weight});
+
+  // Merge Supabase history with localStorage backup — whichever has more wins
+  var sbHist=hist||[];
+  var localHist=JSON.parse(localStorage.getItem('ff_hist_'+uid)||'[]');
+  if(localHist.length>sbHist.length){
+    S.history=localHist;
+    // Push any missing entries to Supabase
+    var sbDates=new Set(sbHist.map(function(h){return h.date}));
+    localHist.filter(function(h){return !sbDates.has(h.date)}).forEach(function(h){
+      dbInsert('workout_history',h);
+    });
+  } else {
+    S.history=sbHist;
+    if(sbHist.length)localStorage.setItem('ff_hist_'+uid,JSON.stringify(sbHist));
+  }
+
+  // Merge suggestions
+  var sbSugg={};(sugg||[]).forEach(function(r){sbSugg[r.exercise_id]=r.suggested_weight});
+  var localSugg=JSON.parse(localStorage.getItem('ff_sugg_'+uid)||'{}');
+  S.suggestions=Object.assign({},localSugg,sbSugg); // Supabase wins on conflicts
+
+  // Merge PRs
+  var sbPrs={};(prs||[]).forEach(function(r){sbPrs[r.exercise_name]=r.weight});
+  var localPrs=JSON.parse(localStorage.getItem('ff_prs_'+uid)||'{}');
+  S.prs=Object.assign({},localPrs,sbPrs);
+
   S.bwlog=bw||[];
-  // load soreness from profile
   S.soreness=!!(S.profile&&S.profile.soreness);
 }
 
@@ -1188,16 +1210,19 @@ async function finishWkt(){
     }
   });
 
-  // Save to DB
-  var histEntry={user_id:S.uid,workout_id:w.id,workout_name:w.name,date:new Date().toISOString(),log:S.awLog.map(function(l){return{n:l.n,w:l.w,reps:l.reps,note:l.note||''}})};
-  await dbInsert('workout_history',histEntry);
+  // Save to DB — also save to localStorage immediately as crash-safe backup
+  var histEntry={user_id:S.uid,workout_id:w.id,workout_name:w.name,date:new Date().toISOString(),created_at:new Date().toISOString(),log:S.awLog.map(function(l){return{n:l.n,w:l.w,reps:l.reps,note:l.note||''}})};
   S.history=[histEntry,...S.history].slice(0,100);
-
+  // Write to localStorage immediately so refresh never loses it
+  localStorage.setItem('ff_hist_'+S.uid, JSON.stringify(S.history));
+  localStorage.setItem('ff_sugg_'+S.uid, JSON.stringify(S.suggestions));
+  localStorage.setItem('ff_prs_'+S.uid, JSON.stringify(S.prs));
+  // Then push to Supabase in background
+  dbInsert('workout_history',histEntry);
   var suggRows=Object.entries(S.suggestions).map(function(e){return{user_id:S.uid,exercise_id:e[0],suggested_weight:e[1]}});
-  if(suggRows.length)await dbUpsert('load_suggestions',suggRows);
-
+  if(suggRows.length)dbUpsert('load_suggestions',suggRows);
   var prRows=Object.entries(S.prs).map(function(e){return{user_id:S.uid,exercise_name:e[0],weight:e[1]}});
-  if(prRows.length)await dbUpsert('personal_records',prRows);
+  if(prRows.length)dbUpsert('personal_records',prRows);
 
   // PRs
   var prBox=document.getElementById('pr-box');
