@@ -232,11 +232,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       </div>
       <div id="fitbit-data" style="display:none;margin-bottom:12px"></div>
       <div id="fitbit-connect-section">
-        <div style="font-size:12px;color:var(--txt4);margin-bottom:10px;line-height:1.6">Connect your Fitbit to see today's steps, heart rate, and calories burned alongside your workouts.</div>
-        <div class="field-lbl">Your Fitbit Client ID</div>
-        <input id="fitbit-client-id" class="inp" style="margin-bottom:8px" placeholder="23XXXX (from dev.fitbit.com)"/>
-        <div style="font-size:11px;color:var(--txt5);margin-bottom:10px">Register a free Personal app at <span style="color:#00b0b9">dev.fitbit.com</span> to get your Client ID.</div>
-        <button onclick="connectFitbit()" style="width:100%;background:linear-gradient(135deg,#00b0b9,#0096a0);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:800;font-size:14px">Connect Fitbit</button>
+        <div style="font-size:12px;color:var(--txt4);margin-bottom:14px;line-height:1.6">Connect your Fitbit account to see today's steps, heart rate, calories, and floors alongside your workouts.</div>
+        <button onclick="connectFitbit()" style="width:100%;background:linear-gradient(135deg,#00b0b9,#0096a0);color:#fff;border:none;border-radius:10px;padding:14px;font-weight:800;font-size:15px;letter-spacing:.5px">Connect Fitbit Account</button>
       </div>
       <button id="fitbit-disconnect-btn" onclick="disconnectFitbit()" style="display:none;width:100%;background:transparent;border:1px solid var(--bdr2);color:var(--txt4);border-radius:10px;padding:10px;font-weight:700;font-size:13px;margin-top:8px">Disconnect Fitbit</button>
     </div>
@@ -1847,12 +1844,28 @@ function renderMeasurementsList(){
   }).join('');
 }
 
-// ── FITBIT ────────────────────────────────────────────────────────────────────
-var FITBIT_REDIRECT=window.location.href.split('?')[0].split('#')[0];
+// ── FITBIT (PKCE OAuth2) ──────────────────────────────────────────────────────
+var FITBIT_CLIENT_ID  = '23V6FV';
+var FITBIT_REDIRECT   = 'https://damasta965.github.io/workout/';
+var FITBIT_EDGE_URL   = 'https://shsqmwrdeszfdichcmgm.supabase.co/functions/v1/fitbit-token';
+var FITBIT_SCOPE      = 'activity heartrate profile sleep';
+
+// PKCE helpers
+function b64url(buf){
+  return btoa(String.fromCharCode(...new Uint8Array(buf)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+async function pkceVerifier(){
+  var arr=new Uint8Array(48);crypto.getRandomValues(arr);return b64url(arr);
+}
+async function pkceChallenge(verifier){
+  var enc=new TextEncoder().encode(verifier);
+  var digest=await crypto.subtle.digest('SHA-256',enc);
+  return b64url(digest);
+}
+
 function renderFitbitSection(){
   var token=S.profile&&S.profile.fitbit_token;
-  var clientId=document.getElementById('fitbit-client-id');
-  if(S.profile&&S.profile.fitbit_client_id)clientId.value=S.profile.fitbit_client_id;
   if(token){
     document.getElementById('fitbit-status-badge').style.background='rgba(0,176,185,.15)';
     document.getElementById('fitbit-status-badge').style.color='#00b0b9';
@@ -1866,57 +1879,109 @@ function renderFitbitSection(){
     document.getElementById('fitbit-status-badge').textContent='Not connected';
     document.getElementById('fitbit-connect-section').style.display='block';
     document.getElementById('fitbit-disconnect-btn').style.display='none';
-  }
-  // Check for token in URL hash (after OAuth redirect)
-  if(window.location.hash.includes('access_token')){
-    var hash=window.location.hash.substring(1);
-    var params={};hash.split('&').forEach(function(p){var kv=p.split('=');params[kv[0]]=decodeURIComponent(kv[1]||'')});
-    if(params.access_token){
-      saveFitbitToken(params.access_token);
-      window.history.replaceState(null,'',window.location.pathname);
-    }
+    document.getElementById('fitbit-data').style.display='none';
   }
 }
-async function saveFitbitToken(token){
-  if(!S.profile)return;
-  var clientId=document.getElementById('fitbit-client-id').value.trim();
-  S.profile.fitbit_token=token;
-  S.profile.fitbit_client_id=clientId;
-  await dbPatch('profiles','id=eq.'+S.uid,{fitbit_token:token,fitbit_client_id:clientId});
-  renderFitbitSection();showToast('Fitbit connected!');
-}
-function connectFitbit(){
-  var clientId=document.getElementById('fitbit-client-id').value.trim();
-  if(!clientId){alert('Please enter your Fitbit Client ID first.\n\nGet one free at dev.fitbit.com → Register an App → App Type: Personal');return}
-  localStorage.setItem('fitbitClientId',clientId);
-  var scope='activity heartrate profile sleep';
-  var url='https://www.fitbit.com/oauth2/authorize?response_type=token&client_id='+encodeURIComponent(clientId)+'&redirect_uri='+encodeURIComponent(FITBIT_REDIRECT)+'&scope='+encodeURIComponent(scope)+'&expires_in=604800';
+
+async function connectFitbit(){
+  // Generate PKCE verifier + challenge
+  var verifier=await pkceVerifier();
+  var challenge=await pkceChallenge(verifier);
+  // Persist verifier so we can retrieve it after redirect
+  localStorage.setItem('fitbit_cv',verifier);
+  var url='https://www.fitbit.com/oauth2/authorize'
+    +'?response_type=code'
+    +'&client_id='+encodeURIComponent(FITBIT_CLIENT_ID)
+    +'&redirect_uri='+encodeURIComponent(FITBIT_REDIRECT)
+    +'&scope='+encodeURIComponent(FITBIT_SCOPE)
+    +'&code_challenge='+encodeURIComponent(challenge)
+    +'&code_challenge_method=S256';
   window.location.href=url;
 }
+
+async function handleFitbitCallback(){
+  // Called on page load if ?code= is present in URL
+  var params=new URLSearchParams(window.location.search);
+  var code=params.get('code');
+  var verifier=localStorage.getItem('fitbit_cv');
+  if(!code||!verifier)return false;
+  // Clean up URL immediately
+  window.history.replaceState(null,'',window.location.pathname);
+  localStorage.removeItem('fitbit_cv');
+  showToast('Connecting Fitbit...',5000);
+  try{
+    var res=await fetch(FITBIT_EDGE_URL,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+sbToken(),
+      },
+      body:JSON.stringify({
+        code,
+        code_verifier:verifier,
+        user_id:S.uid,
+      })
+    });
+    var data=await res.json();
+    if(!res.ok||data.error)throw new Error(data.error||'Token exchange failed');
+    // Reload profile to get saved token
+    var prof=await dbQ('profiles','id=eq.'+S.uid);
+    if(prof&&prof[0])S.profile=prof[0];
+    showToast('Fitbit connected!');
+    renderFitbitSection();
+  }catch(e){
+    showToast('Fitbit connection failed: '+e.message,4000);
+    console.error('Fitbit PKCE error:',e);
+  }
+  return true;
+}
+
 async function disconnectFitbit(){
   if(!confirm('Disconnect Fitbit?'))return;
   S.profile.fitbit_token='';
-  await dbPatch('profiles','id=eq.'+S.uid,{fitbit_token:''});
+  S.profile.fitbit_refresh='';
+  await dbPatch('profiles','id=eq.'+S.uid,{fitbit_token:'',fitbit_refresh:''});
   renderFitbitSection();showToast('Fitbit disconnected');
 }
+
 async function fetchFitbitData(token){
   var el=document.getElementById('fitbit-data');
-  el.style.display='block';el.innerHTML='<div style="font-size:12px;color:var(--txt4)">Loading Fitbit data...</div>';
+  el.style.display='block';
+  el.innerHTML='<div style="font-size:12px;color:var(--txt4);padding:4px 0">Loading Fitbit data...</div>';
   try{
     var today=new Date().toISOString().slice(0,10);
-    var [actRes,hrRes]=await Promise.all([
+    var[actRes,hrRes]=await Promise.all([
       fetch('https://api.fitbit.com/1/user/-/activities/date/'+today+'.json',{headers:{Authorization:'Bearer '+token}}),
       fetch('https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json',{headers:{Authorization:'Bearer '+token}})
     ]);
-    if(!actRes.ok){el.innerHTML='<div style="font-size:12px;color:var(--red)">Fitbit token expired. Please reconnect.</div>';return}
-    var act=await actRes.json();var hr=hrRes.ok?await hrRes.json():null;
-    var summary=act.summary||{};
-    var steps=summary.steps||0;var cals=summary.caloriesOut||0;var floors=summary.floors||0;
+    if(!actRes.ok){
+      el.innerHTML='<div style="font-size:12px;color:var(--red)">Fitbit session expired. Please reconnect.</div>';
+      // Clear expired token
+      S.profile.fitbit_token='';
+      await dbPatch('profiles','id=eq.'+S.uid,{fitbit_token:''});
+      renderFitbitSection();
+      return;
+    }
+    var act=await actRes.json();
+    var hr=hrRes.ok?await hrRes.json():null;
+    var sum=act.summary||{};
+    var steps=sum.steps||0,cals=sum.caloriesOut||0,floors=sum.floors||0,dist=sum.distances?sum.distances.find(function(d){return d.activity==='total'}):null;
     var hrVal=hr&&hr['activities-heart']&&hr['activities-heart'][0]&&hr['activities-heart'][0].value&&hr['activities-heart'][0].value.restingHeartRate;
-    el.innerHTML='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:4px">'
-      +[{l:'Steps',v:steps.toLocaleString(),c:'#22c55e'},{l:'Calories',v:cals.toLocaleString(),c:'#ef4444'},{l:'Floors',v:floors,c:'#f97316'},{l:'Resting HR',v:hrVal?hrVal+' bpm':'—',c:'#ec4899'}]
-      .map(function(s){return'<div style="background:var(--bg3);border-radius:10px;padding:10px;text-align:center"><div style="font-size:10px;color:var(--txt4);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">'+s.l+'</div><div style="font-size:18px;font-weight:900;color:'+s.c+'">'+s.v+'</div></div>'}).join('')+'</div>';
-  }catch(e){el.innerHTML='<div style="font-size:12px;color:var(--red)">Could not load Fitbit data.</div>'}
+    var stats=[
+      {l:'Steps',    v:steps.toLocaleString(),            c:'#22c55e'},
+      {l:'Calories', v:cals.toLocaleString(),             c:'#ef4444'},
+      {l:'Floors',   v:floors,                            c:'#f97316'},
+      {l:'Resting HR',v:hrVal?hrVal+' bpm':'—',           c:'#ec4899'},
+    ];
+    el.innerHTML='<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'
+      +stats.map(function(s){
+        return '<div style="background:var(--bg3);border-radius:10px;padding:10px;text-align:center">'
+          +'<div style="font-size:10px;color:var(--txt4);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">'+s.l+'</div>'
+          +'<div style="font-size:17px;font-weight:900;color:'+s.c+'">'+s.v+'</div></div>';
+      }).join('')+'</div>';
+  }catch(e){
+    el.innerHTML='<div style="font-size:12px;color:var(--red)">Could not load Fitbit data.</div>';
+  }
 }
 
 // ── SHARE WORKOUT ─────────────────────────────────────────────────────────────
@@ -1979,31 +2044,15 @@ async function init(){
   var theme=localStorage.getItem('theme')||'dark';
   document.documentElement.classList.toggle('light',theme==='light');
 
-  // Handle Fitbit OAuth redirect (token in URL hash)
-  if(window.location.hash.includes('access_token')){
-    var hash=window.location.hash.substring(1);
-    var params={};hash.split('&').forEach(function(p){var kv=p.split('=');params[kv[0]]=decodeURIComponent(kv[1]||'')});
-    if(params.access_token){
-      window.history.replaceState(null,'',window.location.pathname);
-      var ok2=await sbRestoreSession();
-      if(ok2){
-        await loadAll();
-        var cid=localStorage.getItem('fitbitClientId')||'';
-        if(S.profile){
-          S.profile.fitbit_token=params.access_token;
-          if(cid)S.profile.fitbit_client_id=cid;
-          await dbPatch('profiles','id=eq.'+S.uid,{fitbit_token:params.access_token,fitbit_client_id:cid});
-        }
-        nav('home');
-        switchTab('analytics');
-        showToast('Fitbit connected!',3000);
-        return;
-      }
-    }
-  }
-
   var ok=await sbRestoreSession();
-  if(!ok){nav('auth');return}
+  if(!ok){
+    // Check if this is a Fitbit callback - need to be logged in first
+    if(new URLSearchParams(window.location.search).has('code')&&localStorage.getItem('fitbit_cv')){
+      // Store the code temporarily, redirect to auth
+      nav('auth');return;
+    }
+    nav('auth');return;
+  }
 
   // Show loading
   document.querySelectorAll('.screen').forEach(function(el){el.classList.remove('active')});
@@ -2018,6 +2067,14 @@ async function init(){
   if(!S.profile||!S.profile.name){nav('profile-setup');return}
   if(!S.workouts.length){nav('template');renderTemplates(false);return}
   nav('home');
+
+  // Handle Fitbit PKCE callback (?code= in URL after Fitbit redirects back)
+  if(new URLSearchParams(window.location.search).has('code')){
+    var handled=await handleFitbitCallback();
+    if(handled){
+      switchTab('analytics');
+    }
+  }
 }
 
 init();
