@@ -1844,111 +1844,93 @@ function renderMeasurementsList(){
   }).join('');
 }
 
-// ── FITBIT (Implicit Flow — Personal App, tokens last 1 year) ─────────────────
-var FITBIT_CLIENT_ID = '23V6FV';
-var FITBIT_REDIRECT  = 'https://damasta965.github.io/workout/';
-var FITBIT_SCOPE     = 'activity heartrate profile sleep';
+var FUNCTION_URL = "https://shsqmwrdeszfdichcmgm.supabase.co/functions/v1/fitbit-token";
+var FITBIT_CLIENT_ID = "23V6FV";
+var FITBIT_REDIRECT = "https://damasta965.github.io/workout/";
+var FITBIT_SCOPE = "activity heartrate profile sleep";
 
-function renderFitbitSection(){
-  var token = S.profile && S.profile.fitbit_token;
-  var badge = document.getElementById('fitbit-status-badge');
-  var conn  = document.getElementById('fitbit-connect-section');
-  var disc  = document.getElementById('fitbit-disconnect-btn');
-  var data  = document.getElementById('fitbit-data');
-  if(token){
-    badge.style.background='rgba(0,176,185,.15)';badge.style.color='#00b0b9';badge.textContent='Connected';
-    conn.style.display='none';disc.style.display='block';
-    fetchFitbitData(token);
-  } else {
-    badge.style.background='var(--bg3)';badge.style.color='var(--txt4)';badge.textContent='Not connected';
-    conn.style.display='block';disc.style.display='none';data.style.display='none';
-  }
+// 🔐 PKCE helpers
+function randomString(len=64){
+  const chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let str="";
+  for(let i=0;i<len;i++) str+=chars[Math.floor(Math.random()*chars.length)];
+  return str;
 }
 
-function connectFitbit(){
-  // Implicit flow — Fitbit redirects back with #access_token=... in the URL hash
-  var url = 'https://www.fitbit.com/oauth2/authorize'
-    + '?response_type=token'
-    + '&client_id='    + encodeURIComponent(FITBIT_CLIENT_ID)
-    + '&redirect_uri=' + encodeURIComponent(FITBIT_REDIRECT)
-    + '&scope='        + encodeURIComponent(FITBIT_SCOPE)
-    + '&expires_in=31536000'; // 1 year
+async function sha256(str){
+  const buf = new TextEncoder().encode(str);
+  const digest = await crypto.subtle.digest("SHA-256", buf);
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+// 🔗 Connect
+async function connectFitbit(){
+  const verifier = randomString();
+  const challenge = await sha256(verifier);
+
+  localStorage.setItem("fitbit_verifier", verifier);
+
+  const url = "https://www.fitbit.com/oauth2/authorize"
+    + "?response_type=code"
+    + "&client_id=" + FITBIT_CLIENT_ID
+    + "&redirect_uri=" + encodeURIComponent(FITBIT_REDIRECT)
+    + "&scope=" + encodeURIComponent(FITBIT_SCOPE)
+    + "&code_challenge=" + challenge
+    + "&code_challenge_method=S256";
+
   window.location.href = url;
 }
 
+// 🔁 Callback
 async function handleFitbitCallback(){
-  // Fitbit returns token in URL hash: #access_token=xxx&...
-  if(!window.location.hash || !window.location.hash.includes('access_token')) return false;
-  var hash = window.location.hash.substring(1);
-  var params = {};
-  hash.split('&').forEach(function(p){
-    var kv = p.split('=');
-    params[kv[0]] = decodeURIComponent(kv[1]||'');
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get("code");
+  if(!code) return;
+
+  const verifier = localStorage.getItem("fitbit_verifier");
+
+  await fetch(FUNCTION_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + S.session.access_token
+    },
+    body: JSON.stringify({ code, code_verifier: verifier })
   });
-  if(!params.access_token) return false;
-  // Clean up URL
-  window.history.replaceState(null, '', window.location.pathname);
-  showToast('Saving Fitbit connection...',3000);
-  try{
-    if(S.profile){
-      S.profile.fitbit_token = params.access_token;
-      await dbPatch('profiles','id=eq.'+S.uid,{fitbit_token: params.access_token});
-      showToast('Fitbit connected!');
-      renderFitbitSection();
-    }
-  }catch(e){ showToast('Could not save Fitbit token: '+e.message,4000); }
-  return true;
+
+  window.history.replaceState({}, document.title, window.location.pathname);
+  renderFitbitSection();
 }
 
-async function disconnectFitbit(){
-  if(!confirm('Disconnect Fitbit?')) return;
-  S.profile.fitbit_token = '';
-  await dbPatch('profiles','id=eq.'+S.uid,{fitbit_token:''});
-  renderFitbitSection();showToast('Fitbit disconnected');
+// 📊 Fetch data
+async function fetchFitbitData(){
+  const el = document.getElementById("fitbit-data");
+  el.innerHTML = "Loading...";
+
+  const today = new Date().toISOString().slice(0,10);
+
+  const res = await fetch(FUNCTION_URL + "?date=" + today, {
+    headers: {
+      "Authorization": "Bearer " + S.session.access_token
+    }
+  });
+
+  const data = await res.json();
+
+  const s = data.summary || {};
+
+  el.innerHTML = `
+    <div>Steps: ${s.steps || 0}</div>
+    <div>Calories: ${s.caloriesOut || 0}</div>
+    <div>Floors: ${s.floors || 0}</div>
+  `;
 }
 
-async function fetchFitbitData(token){
-  var el = document.getElementById('fitbit-data');
-  el.style.display='block';
-  el.innerHTML='<div style="font-size:12px;color:var(--txt4);padding:4px 0">Loading Fitbit data...</div>';
-  try{
-    var today = new Date().toISOString().slice(0,10);
-    var[actRes,hrRes] = await Promise.all([
-      fetch('https://api.fitbit.com/1/user/-/activities/date/'+today+'.json',{headers:{Authorization:'Bearer '+token}}),
-      fetch('https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json',{headers:{Authorization:'Bearer '+token}})
-    ]);
-    if(!actRes.ok){
-      // Token expired or revoked
-      el.innerHTML='<div style="font-size:12px;color:var(--red)">Fitbit session expired. Please reconnect.</div>';
-      S.profile.fitbit_token='';
-      await dbPatch('profiles','id=eq.'+S.uid,{fitbit_token:''});
-      document.getElementById('fitbit-status-badge').style.background='var(--bg3)';
-      document.getElementById('fitbit-status-badge').style.color='var(--txt4)';
-      document.getElementById('fitbit-status-badge').textContent='Not connected';
-      document.getElementById('fitbit-connect-section').style.display='block';
-      document.getElementById('fitbit-disconnect-btn').style.display='none';
-      return;
-    }
-    var act = await actRes.json();
-    var hr  = hrRes.ok ? await hrRes.json() : null;
-    var sum = act.summary||{};
-    var steps  = sum.steps||0;
-    var cals   = sum.caloriesOut||0;
-    var floors = sum.floors||0;
-    var hrVal  = hr&&hr['activities-heart']&&hr['activities-heart'][0]&&hr['activities-heart'][0].value&&hr['activities-heart'][0].value.restingHeartRate;
-    el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'
-      +[
-        {l:'Steps',      v:steps.toLocaleString(),  c:'#22c55e'},
-        {l:'Calories',   v:cals.toLocaleString(),   c:'#ef4444'},
-        {l:'Floors',     v:floors,                  c:'#f97316'},
-        {l:'Resting HR', v:hrVal?hrVal+' bpm':'—',  c:'#ec4899'},
-      ].map(function(s){
-        return '<div style="background:var(--bg3);border-radius:10px;padding:10px;text-align:center">'
-          +'<div style="font-size:10px;color:var(--txt4);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px">'+s.l+'</div>'
-          +'<div style="font-size:17px;font-weight:900;color:'+s.c+'">'+s.v+'</div></div>';
-      }).join('')+'</div>';
-  }catch(e){
-    el.innerHTML='<div style="font-size:12px;color:var(--red)">Could not load Fitbit data.</div>';
+// 🎯 Render
+function renderFitbitSection(){
+  if(S.session){
+    fetchFitbitData();
   }
 }
 
