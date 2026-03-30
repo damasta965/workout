@@ -1907,7 +1907,6 @@ async function handleFitbitCallback(){
   if(!code||!verifier)return false;
   // Clean up URL immediately
   window.history.replaceState(null,'',window.location.pathname);
-  localStorage.removeItem('fitbit_cv');
   showToast('Connecting Fitbit...',5000);
   try{
     console.log('Calling edge function with code:',code.slice(0,10)+'...','verifier:',verifier.slice(0,10)+'...','uid:',S.uid);
@@ -1931,6 +1930,7 @@ async function handleFitbitCallback(){
       console.log('Fitbit error details:',JSON.stringify(data));
       throw new Error(data.error||'Token exchange failed ('+res.status+')');
     }
+    localStorage.removeItem('fitbit_cv');
     // Reload profile to get saved token
     var prof=await dbQ('profiles','id=eq.'+S.uid);
     if(prof&&prof[0])S.profile=prof[0];
