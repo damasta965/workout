@@ -1923,7 +1923,12 @@ async function handleFitbitCallback(){
       })
     });
     var data=await res.json();
-    if(!res.ok||data.error)throw new Error(data.error||'Token exchange failed');
+    console.log('Fitbit token exchange response:',data);
+    if(!res.ok||data.error){
+      var msg=data.error||'Token exchange failed';
+      if(data.fitbit_response)console.log('Fitbit raw error:',JSON.stringify(data.fitbit_response));
+      throw new Error(msg);
+    }
     // Reload profile to get saved token
     var prof=await dbQ('profiles','id=eq.'+S.uid);
     if(prof&&prof[0])S.profile=prof[0];
