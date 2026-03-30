@@ -1915,8 +1915,8 @@ async function handleFitbitCallback(){
   showToast('Connecting Fitbit...',5000);
   try{
     console.log('Calling edge function with code:',code.slice(0,10)+'...','verifier:',verifier.slice(0,10)+'...','uid:',S.uid);
-    const session = await supabase.auth.getSession()
-    
+    const { data: { session } } = await supabase.auth.getSession()
+
     var res=await fetch(FITBIT_EDGE_URL,{
       method:'POST',
       headers:{
