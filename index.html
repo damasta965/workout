@@ -1846,7 +1846,7 @@ function renderMeasurementsList(){
 
 // ── FITBIT (PKCE OAuth2) ──────────────────────────────────────────────────────
 var FITBIT_CLIENT_ID  = '23V6FV';
-var FITBIT_REDIRECT   = 'https://damasta965.github.io/workout/index.html';
+var FITBIT_REDIRECT   = 'https://damasta965.github.io/workout/';
 var FITBIT_EDGE_URL   = 'https://shsqmwrdeszfdichcmgm.supabase.co/functions/v1/fitbit-token';
 var FITBIT_SCOPE      = 'activity heartrate profile sleep';
 
@@ -1855,13 +1855,8 @@ function b64url(buf){
   return btoa(String.fromCharCode(...new Uint8Array(buf)))
     .replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
 }
-async function pkceVerifier() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'
-  let verifier = ''
-  for (let i = 0; i < 64; i++) {
-    verifier += chars[Math.floor(Math.random() * chars.length)]
-  }
-  return verifier
+async function pkceVerifier(){
+  var arr=new Uint8Array(48);crypto.getRandomValues(arr);return b64url(arr);
 }
 async function pkceChallenge(verifier){
   var enc=new TextEncoder().encode(verifier);
@@ -1912,15 +1907,15 @@ async function handleFitbitCallback(){
   if(!code||!verifier)return false;
   // Clean up URL immediately
   window.history.replaceState(null,'',window.location.pathname);
+  localStorage.removeItem('fitbit_cv');
   showToast('Connecting Fitbit...',5000);
   try{
     console.log('Calling edge function with code:',code.slice(0,10)+'...','verifier:',verifier.slice(0,10)+'...','uid:',S.uid);
-    const { data: { session } } = await supabase.auth.getSession()
-
     var res=await fetch(FITBIT_EDGE_URL,{
       method:'POST',
       headers:{
         'Content-Type':'application/json',
+        'apikey': 'sb_publishable_etp9W7AbUCpqDyj8eXmpOw_spA6E2Fy',
       },
       body:JSON.stringify({
         code,
@@ -1936,7 +1931,6 @@ async function handleFitbitCallback(){
       console.log('Fitbit error details:',JSON.stringify(data));
       throw new Error(data.error||'Token exchange failed ('+res.status+')');
     }
-    localStorage.removeItem('fitbit_cv');
     // Reload profile to get saved token
     var prof=await dbQ('profiles','id=eq.'+S.uid);
     if(prof&&prof[0])S.profile=prof[0];
