@@ -1910,11 +1910,12 @@ async function handleFitbitCallback(){
   localStorage.removeItem('fitbit_cv');
   showToast('Connecting Fitbit...',5000);
   try{
+    console.log('Calling edge function with code:',code.slice(0,10)+'...','verifier:',verifier.slice(0,10)+'...','uid:',S.uid);
     var res=await fetch(FITBIT_EDGE_URL,{
       method:'POST',
       headers:{
         'Content-Type':'application/json',
-        'Authorization':'Bearer '+sbToken(),
+        'apikey': 'sb_publishable_etp9W7AbUCpqDyj8eXmpOw_spA6E2Fy',
       },
       body:JSON.stringify({
         code,
@@ -1922,12 +1923,13 @@ async function handleFitbitCallback(){
         user_id:S.uid,
       })
     });
-    var data=await res.json();
-    console.log('Fitbit token exchange response:',data);
+    var text=await res.text();
+    console.log('Edge function raw response:',res.status, text);
+    var data;
+    try{data=JSON.parse(text)}catch(e){throw new Error('Edge function returned non-JSON: '+text.slice(0,200))}
     if(!res.ok||data.error){
-      var msg=data.error||'Token exchange failed';
-      if(data.fitbit_response)console.log('Fitbit raw error:',JSON.stringify(data.fitbit_response));
-      throw new Error(msg);
+      console.log('Fitbit error details:',JSON.stringify(data));
+      throw new Error(data.error||'Token exchange failed ('+res.status+')');
     }
     // Reload profile to get saved token
     var prof=await dbQ('profiles','id=eq.'+S.uid);
