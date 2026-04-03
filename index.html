@@ -1359,27 +1359,27 @@ async function fetchBrief(w,ak){
   var prof=S.profile;var ctx='Client: '+(prof?prof.name+', age '+prof.age+', '+prof.weight_lbs+'lbs, goal: '+(GOALS[prof.goal]||prof.goal):'no profile')+'. Soreness mode: '+(S.soreness?'YES':'No')+'.';
   try{
     var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':ak,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:280,messages:[{role:'user',content:ctx+'\n\nUpcoming workout: '+w.name+' ('+w.exercises.length+' exercises, '+w.rest_seconds+'s rest'+(w.is_circuit?', circuit':'')+').\n'+lastStr+'\n\nGive exactly 3 short punchy sentences: (1) what to focus on today, (2) one key form or effort tip, (3) motivating closer. No headers, no lists. Be specific and direct.'}]})});
+    // If API fails (bad key, network error etc), skip brief and go straight to workout
+    if(!res.ok){closeModal('brief');startWkt(S.pendingWktId);return;}
     var data=await res.json();var tb=data.content&&data.content.find(function(b){return b.type==='text'});
     document.getElementById('brief-text').textContent=tb?tb.text:"Let's get after it today. Focus on controlled form and full range of motion. You've got this!";
-  }catch(e){document.getElementById('brief-text').textContent="Focus on form first, weight second. Hit every rep with intention. Let's go!";}
-  document.getElementById('brief-loading').style.display='none';document.getElementById('brief-text').style.display='block';
+    document.getElementById('brief-loading').style.display='none';document.getElementById('brief-text').style.display='block';
+  }catch(e){
+    // Any error — just skip the brief and start the workout
+    closeModal('brief');startWkt(S.pendingWktId);
+  }
 }
-function skipBrief(){
-  try{closeModal('brief');}catch(e){}
-  startWkt(S.pendingWktId);
-}
-function closeBriefAndStart(){
-  try{closeModal('brief');}catch(e){}
-  startWkt(S.pendingWktId);
-}
+function skipBrief(){closeModal('brief');startWkt(S.pendingWktId);}
+function closeBriefAndStart(){closeModal('brief');startWkt(S.pendingWktId);}
 
 // ACTIVE WORKOUT
 function startWkt(wid){
   try{
+    // Force-close any open modals that might overlay the workout screen
+    document.querySelectorAll('.modal-ov').forEach(function(m){m.style.display='none';});
     var w=S.workouts.find(function(x){return x.id===wid});
     if(!w||!w.exercises.length){alert('This workout has no exercises. Add some in the builder first.');return}
     S.aw=w;S.awLog=[];S.awExIdx=0;S.awSetIdx=0;S.awRound=0;
-    // Navigate FIRST so screen is visible before we populate it
     nav('workout');
     document.getElementById('warmup-box').style.display=(w.warmup&&w.warmup.length)?'block':'none';
     document.getElementById('warmup-items').innerHTML=(w.warmup||[]).map(function(x){return'<div style="font-size:12px;color:var(--yel);padding:2px 0">&bull; '+escHtml(x)+'</div>'}).join('');
